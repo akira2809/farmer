@@ -4,6 +4,8 @@ from pydantic import BaseModel, Field, field_validator
 from bson import ObjectId
 from enum import Enum
 
+from app.models.base import PyObjectId
+
 
 class CropStatus(str, Enum):
     """Enum for crop status values"""
@@ -33,8 +35,8 @@ class GeoJSONPoint(BaseModel):
 
 class FarmInDB(BaseModel):
     """Farm model stored in MongoDB"""
-    id: Optional[str] = Field(None, alias="_id")
-    user_id: str
+    id: Optional[PyObjectId] = Field(None, alias="_id")
+    user_id: PyObjectId
     name: str
     location: GeoJSONPoint
     crop_type: Optional[str] = None
@@ -46,6 +48,7 @@ class FarmInDB(BaseModel):
     
     class Config:
         populate_by_name = True
+        arbitrary_types_allowed = True
         json_encoders = {
             ObjectId: str,
             datetime: lambda v: v.isoformat()

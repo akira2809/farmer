@@ -1,6 +1,28 @@
 from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+
+class WeatherRequest(BaseModel):
+    """Request model for weather forecast by coordinates"""
+    latitude: float = Field(..., description="Latitude coordinate", ge=-90, le=90)
+    longitude: float = Field(..., description="Longitude coordinate", ge=-180, le=180)
+    
+    @field_validator('latitude')
+    @classmethod
+    def validate_latitude(cls, v):
+        """Validate latitude range"""
+        if not (-90 <= v <= 90):
+            raise ValueError('Latitude must be between -90 and 90')
+        return v
+    
+    @field_validator('longitude')
+    @classmethod
+    def validate_longitude(cls, v):
+        """Validate longitude range"""
+        if not (-180 <= v <= 180):
+            raise ValueError('Longitude must be between -180 and 180')
+        return v
 
 
 class DailyForecast(BaseModel):

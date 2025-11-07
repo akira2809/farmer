@@ -50,7 +50,7 @@ class NotificationService:
         Helper method to create a disease detection notification
         
         Args:
-            user_id: ID of the user to notify
+            user_id: ID of the user to notify (as string)
             disease_name: Name of the detected disease
             farm_name: Optional farm name for context
             
@@ -69,7 +69,7 @@ class NotificationService:
         message = f"Disease detected: {disease_name}{farm_context}. Please check your diagnosis for recommendations."
         
         notification_data = NotificationCreate(
-            user_id=user_id,
+            user_id=ObjectId(user_id),
             message=message,
             type=NotificationType.DISEASE_DETECTED
         )
@@ -85,7 +85,7 @@ class NotificationService:
         Helper method to create a weather alert notification
         
         Args:
-            user_id: ID of the user to notify
+            user_id: ID of the user to notify (as string)
             alert_message: Weather alert message
             
         Returns:
@@ -99,7 +99,7 @@ class NotificationService:
             )
         """
         notification_data = NotificationCreate(
-            user_id=user_id,
+            user_id=ObjectId(user_id),
             message=alert_message,
             type=NotificationType.WEATHER_ALERT
         )
@@ -116,7 +116,7 @@ class NotificationService:
         Get notifications for a user with pagination, sorted by timestamp (newest first)
         
         Args:
-            user_id: ID of the user
+            user_id: ID of the user (as string)
             skip: Number of notifications to skip (for pagination)
             limit: Maximum number of notifications to return (default: 20, max: 100)
             
@@ -126,7 +126,7 @@ class NotificationService:
         # Ensure limit doesn't exceed maximum
         limit = min(limit, 100)
         
-        cursor = self.collection.find({"user_id": user_id}).sort("created_at", -1).skip(skip).limit(limit)
+        cursor = self.collection.find({"user_id": ObjectId(user_id)}).sort("created_at", -1).skip(skip).limit(limit)
         notifications = await cursor.to_list(length=limit)
         
         return [self._notification_to_response(notification) for notification in notifications]
@@ -136,25 +136,25 @@ class NotificationService:
         Get total count of notifications for a user
         
         Args:
-            user_id: ID of the user
+            user_id: ID of the user (as string)
             
         Returns:
             int: Total number of notifications
         """
-        return await self.collection.count_documents({"user_id": user_id})
+        return await self.collection.count_documents({"user_id": ObjectId(user_id)})
     
     async def get_unread_notifications_count(self, user_id: str) -> int:
         """
         Get count of unread notifications for a user
         
         Args:
-            user_id: ID of the user
+            user_id: ID of the user (as string)
             
         Returns:
             int: Number of unread notifications
         """
         return await self.collection.count_documents({
-            "user_id": user_id,
+            "user_id": ObjectId(user_id),
             "read_status": False
         })
     
@@ -204,7 +204,7 @@ class NotificationService:
         """
         return NotificationResponse(
             id=str(notification["_id"]),
-            user_id=notification["user_id"],
+            user_id=str(notification["user_id"]),
             message=notification["message"],
             type=NotificationType(notification["type"]),
             read_status=notification["read_status"],

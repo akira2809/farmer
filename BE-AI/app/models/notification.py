@@ -17,7 +17,7 @@ class NotificationType(str, Enum):
 class NotificationInDB(BaseModel):
     """Notification model stored in MongoDB"""
     id: Optional[PyObjectId] = Field(default=None, alias="_id")
-    user_id: str
+    user_id: PyObjectId
     message: str
     type: NotificationType
     read_status: bool = False
@@ -34,9 +34,12 @@ class NotificationInDB(BaseModel):
 
 class NotificationCreate(BaseModel):
     """Schema for creating a new notification"""
-    user_id: str = Field(..., min_length=1)
+    user_id: PyObjectId
     message: str = Field(..., min_length=1, max_length=500)
     type: NotificationType
+    
+    class Config:
+        arbitrary_types_allowed = True
     
     @field_validator('message')
     @classmethod

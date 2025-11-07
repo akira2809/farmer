@@ -26,14 +26,14 @@ class FarmService:
         Create a new farm with user_id association and crop information
         
         Args:
-            user_id: ID of the user creating the farm
+            user_id: ID of the user creating the farm (as string)
             farm_data: Farm creation data
             
         Returns:
             FarmResponse: Created farm data
         """
         farm_dict = farm_data.model_dump()
-        farm_dict["user_id"] = user_id
+        farm_dict["user_id"] = ObjectId(user_id)
         farm_dict["created_at"] = datetime.utcnow()
         farm_dict["updated_at"] = datetime.utcnow()
         
@@ -59,13 +59,13 @@ class FarmService:
         Get all farms for a user with optional filtering by crop_status
         
         Args:
-            user_id: ID of the user
+            user_id: ID of the user (as string)
             filters: Optional filters to apply
             
         Returns:
             List[FarmResponse]: List of user's farms
         """
-        query = {"user_id": user_id}
+        query = {"user_id": ObjectId(user_id)}
         
         # Apply crop_status filter if provided
         if filters and filters.crop_status:
@@ -198,8 +198,8 @@ class FarmService:
         Verify that a farm belongs to a specific user
         
         Args:
-            user_id: ID of the user
-            farm_id: ID of the farm
+            user_id: ID of the user (as string)
+            farm_id: ID of the farm (as string)
             
         Returns:
             bool: True if user owns the farm, False otherwise
@@ -209,7 +209,7 @@ class FarmService:
         
         farm = await self.collection.find_one({
             "_id": ObjectId(farm_id),
-            "user_id": user_id
+            "user_id": ObjectId(user_id)
         })
         
         return farm is not None
@@ -226,7 +226,7 @@ class FarmService:
         """
         return FarmResponse(
             id=str(farm["_id"]),
-            user_id=farm["user_id"],
+            user_id=str(farm["user_id"]),
             name=farm["name"],
             location={
                 "type": "Point",

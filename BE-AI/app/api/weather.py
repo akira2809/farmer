@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Dict, Any
 
-from app.models.weather import WeatherForecast
+from app.models.weather import WeatherForecast, WeatherRequest
+from app.models.farm import GeoJSONPoint
 from app.models.user import UserInDB
 from app.models.api_response import APIResponse, success_response, error_response
 from app.services.weather_service import WeatherService
@@ -23,6 +24,75 @@ def get_farm_service() -> FarmService:
     return FarmService(get_database())
 
 
+@router.post(
+    "/forecast",
+    response_model=APIResponse[WeatherForecast],
+    status_code=status.HTTP_200_OK
+)
+async def get_weather_forecast(
+    weather_request: WeatherRequest,
+    current_user: UserInDB = Depends(get_current_user),
+    weather_service: WeatherService = Depends(get_weather_service)
+) -> Dict[str, Any]:
+    """
+    Get 5-day weather forecast for specific coordinates (authenticated).
+    
+    Send latitude and longitude in request body to get weather forecast
+    including temperature, humidity, rainfall, and conditions.
+    
+    Request body:
+    - **latitude**: Latitude coordinate (-90 to 90)
+    - **longitude**: Longitude coordinate (-180 to 180)
+    
+    Returns weather forecast with:
+    - Current weather conditions
+    - 5-day forecast with daily details
+    - Temperature, humidity, and rainfall data
+    """
+    try:
+        # Create GeoJSON Point from coordinates
+        location = GeoJSONPoint(
+            type="Point",
+            coordinates=[weather_request.longitude, weather_request.latitude]
+        )
+        
+        # Fetch weather forecast
+        weather = await weather_service.get_weather_forecast(location)
+        
+        return success_response(
+            data=weather.model_dump(),
+            message="Weather forecast retrieved successfully"
+        )
+        
+    except HTTPException as e:
+        # Handle timeout and service unavailable errors
+        if e.status_code == status.HTTP_504_GATEWAY_TIMEOUT:
+            return error_response(
+                message=e.detail,
+                code="WEATHER_TIMEOUT"
+            )
+        elif e.status_code == status.HTTP_503_SERVICE_UNAVAILABLE:
+            return error_response(
+                message=e.detail,
+                code="WEATHER_SERVICE_UNAVAILABLE"
+            )
+        else:
+            return error_response(
+                message=str(e.detail),
+                code="WEATHER_ERROR"
+            )
+    except ValueError as e:
+        return error_response(
+            message=str(e),
+            code="VALIDATION_ERROR"
+        )
+    except Exception as e:
+        return error_response(
+            message=f"Failed to retrieve weather forecast: {str(e)}",
+            code="INTERNAL_ERROR"
+        )
+
+
 @router.get(
     "/farm/{farm_id}",
     response_model=APIResponse[WeatherForecast]
@@ -36,14 +106,14 @@ async def get_farm_weather(
     """
     Get weather forecast for a specific farm location (authenticated).
     
-    Retrieves the farm's location and fetches a 7-day weather forecast
+    Retrieves the farm's location and fetches a 5-day weather forecast
     including temperature, humidity, rainfall, and conditions.
     
     - **farm_id**: ID of the farm to get weather forecast for
     
     Returns weather forecast with:
     - Current weather conditions
-    - 7-day forecast with daily details
+    - 5-day forecast with daily details
     - Temperature, humidity, and rainfall data
     """
     try:

@@ -19,7 +19,8 @@ class Settings(BaseSettings):
     WEATHER_API_URL: str
     IMAGE_AI_API_KEY: str
     IMAGE_AI_API_URL: str
-    N8N_WEBHOOK_URL: str
+    N8N_WEBHOOK_URL: str  # n8n webhook for weather forecast
+    N8N_CHAT_WEBHOOK_URL: str  # n8n webhook for chatbot
     
     # Cloud Storage Configuration
     CLOUD_STORAGE_BUCKET: str
