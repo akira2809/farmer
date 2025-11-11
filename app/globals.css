@@ -1,2 +1,39 @@
 @import "tailwindcss";
 
+/* Custom color variables for the design system */
+:root {
+  --color: #fffcf6;
+  --color-2: #ebf5ed;
+  --color-3: #d68b00;
+  --color-5: #2e8623;
+  --color-6: #191f19;
+}
+
+/* Font family utilities */
+.font-playfair {
+  font-family: var(--font-playfair), 'Playfair Display', serif;
+}
+
+.font-be-vietnam {
+  font-family: var(--font-be-vietnam), 'Be Vietnam Pro', sans-serif;
+}
+
+/* Override Tailwind defaults to use custom fonts */
+body {
+  font-family: var(--font-be-vietnam), 'Be Vietnam Pro', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-playfair), 'Playfair Display', serif;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
