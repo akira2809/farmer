@@ -19,6 +19,37 @@ const beVietnam = Be_Vietnam_Pro({
 export const metadata: Metadata = {
   title: "NôngDana - Nông nghiệp 4.0",
   description: "Cây trong tầm tay - Mùa màng bội thu. Giải pháp toàn diện cho nông nghiệp hiện đại.",
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+  manifest: '/site.webmanifest',
+  themeColor: '#2e8623',
+  openGraph: {
+    title: 'NôngDana - Nông nghiệp 4.0',
+    description: 'Cây trong tầm tay - Mùa màng bội thu. Giải pháp toàn diện cho nông nghiệp hiện đại.',
+    url: 'https://nongdana.vn',
+    siteName: 'NôngDana',
+    locale: 'vi_VN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'NôngDana - Nông nghiệp 4.0',
+    description: 'Cây trong tầm tay - Mùa màng bội thu. Giải pháp toàn diện cho nông nghiệp hiện đại.',
+  },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
+  metadataBase: new URL('https://nongdana.vn'),
 };
 
 export default function RootLayout({

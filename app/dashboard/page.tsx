@@ -1,5 +1,3 @@
-"use client";
-
 import Sidebar from "./Sidebar";
 import Image from "next/image";
 
