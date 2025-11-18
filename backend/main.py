@@ -6,7 +6,8 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.database import connect_to_mongo, close_mongo_connection
 from app.core.exception_handlers import validation_exception_handler, general_exception_handler
-from app.api import auth, farms, weather, ai_chat
+from app.core.scheduler import initialize_scheduler, shutdown_scheduler
+from app.api import auth, farms, weather, ai_chat, notifications
 from app.models.api_response import success_response
 
 
@@ -15,8 +16,10 @@ async def lifespan(app: FastAPI):
     """Application lifespan manager"""
     # Startup
     await connect_to_mongo()
+    initialize_scheduler()
     yield
     # Shutdown
+    shutdown_scheduler()
     await close_mongo_connection()
 
 
@@ -44,6 +47,7 @@ app.include_router(auth.router)
 app.include_router(farms.router)
 app.include_router(weather.router)
 app.include_router(ai_chat.router)
+app.include_router(notifications.router)
 
 
 @app.get("/health")

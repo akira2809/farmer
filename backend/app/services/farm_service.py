@@ -214,6 +214,17 @@ class FarmService:
         
         return farm is not None
     
+    async def get_all_farms(self) -> List[FarmResponse]:
+        """
+        Get all farms from the database.
+        
+        Returns:
+            List[FarmResponse]: A list of all farms.
+        """
+        cursor = self.collection.find({}).sort("created_at", -1)
+        farms = await cursor.to_list(length=None)
+        return [self._farm_to_response(farm) for farm in farms]
+
     def _farm_to_response(self, farm: dict) -> FarmResponse:
         """
         Convert MongoDB farm document to FarmResponse

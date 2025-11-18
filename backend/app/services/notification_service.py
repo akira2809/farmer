@@ -30,6 +30,11 @@ class NotificationService:
             NotificationResponse: Created notification data
         """
         notification_dict = notification_data.model_dump()
+        
+        # Ensure user_id is an ObjectId before saving, as model_dump() serializes it to a string
+        if "user_id" in notification_dict and isinstance(notification_dict["user_id"], str):
+            notification_dict["user_id"] = ObjectId(notification_dict["user_id"])
+
         notification_dict["read_status"] = False
         notification_dict["created_at"] = datetime.utcnow()
         
@@ -65,8 +70,8 @@ class NotificationService:
                 farm_name=farm.name
             )
         """
-        farm_context = f" on farm '{farm_name}'" if farm_name else ""
-        message = f"Disease detected: {disease_name}{farm_context}. Please check your diagnosis for recommendations."
+        farm_context = f" tại nông trại '{farm_name}'" if farm_name else ""
+        message = f"Phát hiện bệnh: {disease_name}{farm_context}. Vui lòng kiểm tra chẩn đoán để xem các khuyến nghị."
         
         notification_data = NotificationCreate(
             user_id=ObjectId(user_id),
@@ -106,8 +111,33 @@ class NotificationService:
         
         return await self.create_notification(notification_data)
     
+    async def create_daily_weather_notification(
+        self,
+        user_id: str,
+        farm_name: str,
+        weather_summary: str
+    ) -> NotificationResponse:
+        """
+        Helper method to create a daily weather forecast notification.
+        
+        Args:
+            user_id: ID of the user to notify (as string)
+            farm_name: Name of the farm for context
+            weather_summary: A summary of the weather forecast
+            
+        Returns:
+            NotificationResponse: Created notification data
+        """
+        message = f"Thời tiết hôm nay cho trang trại {farm_name}: {weather_summary}"
+        notification_data = NotificationCreate(
+            user_id=ObjectId(user_id),
+            message=message,
+            type=NotificationType.DAILY_WEATHER_FORECAST
+        )
+        return await self.create_notification(notification_data)
+    
     async def get_user_notifications(
-        self, 
+        self,
         user_id: str,
         skip: int = 0,
         limit: int = 20

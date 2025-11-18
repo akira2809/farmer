@@ -11,6 +11,7 @@ class NotificationType(str, Enum):
     """Enum for notification types"""
     WEATHER_ALERT = "weather_alert"
     DISEASE_DETECTED = "disease_detected"
+    DAILY_WEATHER_FORECAST = "daily_weather_forecast"
     SYSTEM = "system"
 
 

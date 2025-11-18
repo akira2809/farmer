@@ -25,6 +25,28 @@ class WeatherRequest(BaseModel):
         return v
 
 
+class HourlyForecast(BaseModel):
+    """Hourly weather forecast data"""
+    time: str = Field(..., description="Time of the forecast")
+    temp_c: float = Field(..., description="Temperature in Celsius")
+    condition: str = Field(..., description="Weather condition text")
+    wind_kph: float = Field(..., description="Wind speed in kilometers per hour")
+    wind_dir: str = Field(..., description="Wind direction")
+    precip_mm: float = Field(..., description="Precipitation in millimeters")
+    humidity: float = Field(..., description="Humidity percentage")
+    chance_of_rain: int = Field(..., description="Chance of rain percentage")
+
+
+class WeatherAlert(BaseModel):
+    """Weather alert data"""
+    headline: str = Field(..., description="Alert headline")
+    event: str = Field(..., description="Type of alert")
+    effective: str = Field(..., description="Effective time of the alert")
+    expires: str = Field(..., description="Expiration time of the alert")
+    description: str = Field(..., description="Full description of the alert")
+    instruction: str = Field(..., description="Instructional text for the alert")
+
+
 class DailyForecast(BaseModel):
     """Daily weather forecast data"""
     date: str
@@ -35,6 +57,7 @@ class DailyForecast(BaseModel):
     avg_humidity: float = Field(..., description="Average humidity percentage")
     total_rainfall: float = Field(..., description="Total rainfall in mm")
     conditions: str = Field(..., description="Weather conditions description")
+    hourly: List[HourlyForecast] = Field([], description="Hourly forecast for the day")
     
     class Config:
         json_encoders = {
@@ -50,6 +73,7 @@ class WeatherForecast(BaseModel):
     conditions: str = Field(..., description="Current weather conditions")
     forecast_days: List[DailyForecast] = Field(..., description="Multi-day forecast")
     location: str = Field(..., description="Location name")
+    alerts: List[WeatherAlert] = Field([], description="Weather alerts for the location")
     
     class Config:
         json_encoders = {
