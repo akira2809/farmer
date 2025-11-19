@@ -1,0 +1,47 @@
+const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_CLIENT = process.env.NEXT_PUBLIC_API_CLIENT;
+
+export default {
+    auth : {
+        // POST: Login with credentials
+        login : `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/auth/login`,
+        // POST: Register new user
+        register : `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/auth/register`,
+        // POST: Refresh access token
+        refreshToken : `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/auth/refresh`,
+        // POST: Logout and invalidate token
+        logout : `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/auth/logout`,
+    },
+    Farm : {
+        // POST: Create a new farm
+        createFarm : `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/farms`,
+        // GET: Get all farms for current user
+        getFarms: `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/farms`,
+        // GET: Get farm details by ID
+        getFarmById: `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/farms/:farmId`,
+        // PATCH: Update farm information
+        updateFarm: `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/farms/:farmId`,
+        // PATCH: Update crop status for a farm
+        updateCropStatus: `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/farms/:farmId/status`,
+    },
+    Weather : {
+        // GET: Get weather forecast
+        getWeather : `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/weather/forecast`,
+        // GET: Get weather data for a specific farm
+        getWeatherByFarm : `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/weather/farm/:farmId`,
+    },
+    AI : { //AI assistant
+        // POST: Detect plant disease from image
+        detectDisease : `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/ai/detect-disease`,
+        // POST: Chat with AI assistant
+        chatWithAI : `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/ai/chat`,
+        // GET: Check if AI service is healthy
+        checkAiHealth : `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/ai/health`,
+    },
+    Notification : {
+        // GET: Get all notifications for current user
+        getNotifications : `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/notifications`,
+        // PATCH: Mark notification as read
+        updateNotification : `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/notifications/:notificationId/read`,
+    }
+}
