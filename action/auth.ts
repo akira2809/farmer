@@ -27,6 +27,16 @@ export async function actionLogin(phone: string, password: string) {
       path: '/',
     });
 
+    // Set refresh token cookie if available
+    if (res.data.refresh_token) {
+      (await cookies()).set(APP_CONFIG.cookies.refreshTokenKey, res.data.refresh_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 30, // Refresh token typically lasts longer (30 days)
+        path: '/',
+      });
+    }
+
     // Revalidate user data
     revalidateTag('user', 'max');
 
@@ -47,20 +57,50 @@ export async function actionRegister(full_name: string, phone: string, password:
 
     // Call register API
     const res = await authApi.register({ full_name, phone, password, confirm_password, province });
-
-    console.log('Register response:', res);
+  
 
     if (!res || !res.success) {
       return { success: false, error: res?.message || 'Đăng ký thất bại' };
     }
 
+    // If register API doesn't return token, login automatically
+    let token = res?.data?.access_token;
+    let expires_in = res?.data?.expires_in;
+    let loginRes = null;
+    
+    if (!token) {
+      console.log('No token from register, attempting auto-login...');
+      loginRes = await authApi.login({ phone, password });
+      console.log('Auto-login response:', loginRes);
+      
+      if (loginRes.success && loginRes.data?.access_token) {
+        token = loginRes.data.access_token;
+        expires_in = loginRes.data.expires_in;
+      }
+    }
+
+    if (!token) {
+      return { success: false, error: 'Đăng ký thành công nhưng không thể lấy token' };
+    }
+
     // Set auth cookie after successful registration
-    (await cookies()).set(APP_CONFIG.cookies.tokenKey, res.data.access_token, {
+    (await cookies()).set(APP_CONFIG.cookies.tokenKey, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: res.data.expires_in || 60 * 60 * 24 * 7, // Use expires_in from API or fallback to 1 week
+      maxAge: expires_in || 60 * 60 * 24 * 7, // Use expires_in from API or fallback to 1 week
       path: '/',
     });
+
+    // Set refresh token cookie if available from register or login response
+    const refreshToken = res?.data?.refresh_token || loginRes?.data?.refresh_token;
+    if (refreshToken) {
+      (await cookies()).set(APP_CONFIG.cookies.refreshTokenKey, refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 30, // Refresh token typically lasts longer (30 days)
+        path: '/',
+      });
+    }
 
     // Revalidate user data
     revalidateTag('user', 'max');
@@ -72,11 +112,56 @@ export async function actionRegister(full_name: string, phone: string, password:
   }
 }
 
+// Refresh token function
+export async function actionRefreshToken() {
+  try {
+    // Get refresh token from cookies
+    const refreshToken = (await cookies()).get(APP_CONFIG.cookies.refreshTokenKey);
+    
+    if (!refreshToken) {
+      return { success: false, error: 'No refresh token found' };
+    }
+
+    // Call refresh API
+    const res = await authApi.refreshToken();
+    
+    if (!res || !res.success) {
+      return { success: false, error: res?.message || 'Token refresh failed' };
+    }
+
+    // Set new access token
+    (await cookies()).set(APP_CONFIG.cookies.tokenKey, res.data.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: res.data.expires_in || 60 * 60 * 24 * 7,
+      path: '/',
+    });
+
+    // Update refresh token if returned
+    if (res.data.refresh_token) {
+      (await cookies()).set(APP_CONFIG.cookies.refreshTokenKey, res.data.refresh_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 30,
+        path: '/',
+      });
+    }
+
+    return { success: true, data: res.data };
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    return { success: false, error: 'Token refresh failed' };
+  }
+}
+
 // Logout function
 export async function actionLogout() {
   try {
     // Remove auth cookie
     (await cookies()).delete(APP_CONFIG.cookies.tokenKey);
+    
+    // Remove refresh token cookie
+    (await cookies()).delete(APP_CONFIG.cookies.refreshTokenKey);
     
     // Revalidate user data
     revalidateTag('user', 'max');

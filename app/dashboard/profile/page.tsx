@@ -1,13 +1,29 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Sidebar from "../Sidebar";
 import { CircleUserRound } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { clientAuthUtils } from "@/utils/clientAuth";
+import { actionLogout } from "@/action/auth";
 
 const imgImage10 = "https://www.figma.com/api/mcp/asset/2c86edef-cc3f-4608-951a-cd71a71e873c";
 
 export default function ProfilePage() {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      // Call server action to delete cookies and logout
+      await actionLogout();
+      router.push('/signin');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still redirect even if logout fails
+      router.push('/signin');
+    }
+  };
   return (
     <div className="bg-[#fffcf6] flex flex-col md:flex-row items-start relative min-h-screen w-full overflow-hidden">
       <Sidebar activePage="profile" />
@@ -98,14 +114,14 @@ export default function ProfilePage() {
               </button>
             </div>
             <div className="box-border flex flex-col gap-[10px] items-start px-[100px] md:px-[300px] py-0 relative shrink-0 w-full">
-              <Link 
-                href="/dashboard"
-                className="bg-[#b5d5b1] border border-[#fffcf6] border-solid box-border flex gap-[15px] md:gap-[20px] h-[60px] md:h-[71px] items-center justify-center px-[20px] md:px-[25px] py-[16px] md:py-[20px] relative rounded-[20px] shrink-0 w-full hover:bg-[#a0c59c] transition-colors"
+              <button
+                onClick={handleLogout}
+                className="bg-[#dc2626] border border-[#fffcf6] border-solid box-border flex gap-[15px] md:gap-[20px] h-[60px] md:h-[71px] items-center justify-center px-[20px] md:px-[25px] py-[16px] md:py-[20px] relative rounded-[20px] shrink-0 w-full hover:bg-[#b91c1c] transition-colors"
               >
-                <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[17px] md:text-[20px] text-[#191f19]">
-                  Thoát
+                <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[17px] md:text-[20px] text-[#ebf5ed]">
+                  Đăng Xuất
                 </p>
-              </Link>
+              </button>
             </div>
           </div>
         </div>

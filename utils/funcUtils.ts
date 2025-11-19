@@ -1,6 +1,7 @@
 import { APP_CONFIG } from '@/common/config';
 import { getCookie } from 'cookies-next';
 import { toast } from 'sonner';
+import { clientAuthUtils } from './clientAuth';
 
 export type TParams = Record<string, string | number | boolean | undefined | null>;
 
@@ -61,22 +62,7 @@ export const funcUtils = {
    * @returns Authentication token or undefined if not found
    */
   getAuthToken: (): string | undefined => {
-    if (typeof window === 'undefined') {
-      // Server-side: Get from cookie
-      return getCookie(APP_CONFIG.cookies.tokenKey) as string | undefined;
-    } else {
-      // Client-side: Get from localStorage
-      try {
-        const authStorage = localStorage.getItem('auth-storage');
-        if (authStorage) {
-          const parsed = JSON.parse(authStorage);
-          return parsed?.state?.token;
-        }
-      } catch (e) {
-        console.error('Failed to read token from storage:', e);
-      }
-    }
-    return undefined;
+    return getCookie(APP_CONFIG.cookies.tokenKey) as string | undefined;
   },
 
   /**
