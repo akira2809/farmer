@@ -1,12 +1,22 @@
+'use client';
+
 import Sidebar from "../../Sidebar";
+import { useState } from 'react';
 import { Camera, SquarePen } from "lucide-react";
 import { TFarm } from "@/models/farm";
+import DiseaseDetectionModal from './components/DiseaseDetectionModal';
 
 interface FieldDetailClientProps {
   farm: TFarm | null;
 }
 
 export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
   if (!farm) {
     return (
       <div className="bg-[#fffcf6] flex flex-col md:flex-row items-start relative min-h-screen w-full overflow-hidden">
@@ -95,7 +105,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 </p>
                 <input 
                   type="date"
-                  defaultValue={farm.planting_date || '2023-10-23'}
+                  defaultValue={farm.planting_date ? farm.planting_date.split('T')[0] : '2023-10-23'}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
                 />
               </div>
@@ -108,7 +118,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 </p>
                 <input 
                   type="date"
-                  defaultValue={farm.expected_harvest_date || '2024-02-15'}
+                  defaultValue={farm.expected_harvest_date ? farm.expected_harvest_date.split('T')[0] : '2024-02-15'}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
                 />
               </div>
@@ -120,7 +130,10 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 <span className="block">Hãy chụp cho bác sĩ xanh Biết!</span>
               </p>
               
-              <button className="bg-[#2e8623] border border-[#fffcf6] border-solid box-border flex gap-[15px] md:gap-[20px] items-center justify-center px-[20px] md:px-[25px] py-[16px] md:py-[20px] relative rounded-[20px] shrink-0 w-full hover:bg-[#267019] transition-colors">
+              <button 
+                onClick={handleOpenModal}
+                className="bg-[#2e8623] border border-[#fffcf6] border-solid box-border flex gap-[15px] md:gap-[20px] items-center justify-center px-[20px] md:px-[25px] py-[16px] md:py-[20px] relative rounded-[20px] shrink-0 w-full hover:bg-[#267019] transition-colors"
+              >
                 <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[17px] md:text-[20px] text-[#ebf5ed]">
                   Chụp Ngay!
                 </p>
@@ -173,6 +186,14 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
           </div>
         </div>
       </div>
+
+      {/* Disease Detection Modal */}
+      <DiseaseDetectionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        farmId={farm.id}
+        cropType={farm.crop_type}
+      />
     </div>
   );
 }
