@@ -36,10 +36,9 @@ export const clientAuthUtils = {
    */
   refreshToken: async (): Promise<boolean> => {
     try {
-      const response = await authApi.refreshToken();
-      if (response.success && response.data?.access_token) {
-        // Note: In a real implementation, you'd need to update the token cookie
-        // This would typically be done via a server action
+      const { actionRefreshToken } = await import('@/action/auth');
+      const result = await actionRefreshToken();
+      if (result.success) {
         console.log('Token refreshed successfully');
         return true;
       }

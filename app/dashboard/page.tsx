@@ -1,5 +1,24 @@
 import Sidebar from "./Sidebar";
 import Image from "next/image";
+import farmApi from "@/services/farm";
+import { TFarm } from "@/models/farm";
+
+async function getData(): Promise<TFarm[]> {
+  try {
+    const productRes = await farmApi.getFarms();
+    // Extract farm data from response structure
+    const response = productRes as any;
+    const farms = response?.data?.data || 
+                  response?.data?.farms || 
+                  response?.data || 
+                  [];
+    
+    return Array.isArray(farms) ? farms : [];
+  } catch (error) {
+    console.error('Failed to fetch farm data:', error);
+    return [];
+  }
+}
 
 const imgImage6 = "https://www.figma.com/api/mcp/asset/4e070d67-dbbd-4d67-b9d1-50ffc064a606";
 const imgFrame2 = "https://www.figma.com/api/mcp/asset/2781859a-9304-4399-9002-5e1b53c31c3c";
@@ -7,7 +26,8 @@ const imgVector = "https://www.figma.com/api/mcp/asset/fe827d7a-5e7f-40bc-a43b-9
 const img = "https://www.figma.com/api/mcp/asset/128ff98a-2b21-4648-a0e3-c688323f53a4";
 const img1 = "https://www.figma.com/api/mcp/asset/e67b2a82-c3e1-49ef-9428-9c423c769b4f";
 
-export default function Dashboard() {
+export default async function Dashboard() {
+  const data = await getData();
   return (
     <div className="bg-[#fffcf6] flex flex-col md:flex-row items-start relative min-h-screen w-full overflow-hidden">
       <Sidebar activePage="home" />
@@ -51,27 +71,29 @@ export default function Dashboard() {
             Ruộng Của Bạn
           </p>
           <div className="flex gap-[12px] md:gap-[16px] items-start relative shrink-0 w-full overflow-x-auto pb-4 z-10 scrollbar-hide">
-            {[1, 2, 3, 4].map((index) => (
-              <div key={index} className="bg-[#fffcf6] border-2 border-[#2e8623] border-solid relative rounded-[14.09px] shrink-0 w-[220px] md:w-[250px]">
+            {data?.length > 0 ? data.map((farm: TFarm) => (
+              <div key={farm.id || farm.name} className="bg-[#fffcf6] border-2 border-[#2e8623] border-solid relative rounded-[14.09px] shrink-0 w-[220px] md:w-[250px]">
                 <div className="box-border flex flex-col gap-[12px] md:gap-[15px] items-center overflow-clip pb-[20px] md:pb-[24px] pt-[12px] md:pt-[15px] px-[12px] md:px-[15px] relative rounded-[inherit]">
                   <div className="bg-[#d9d9d9] h-[110px] md:h-[130px] shrink-0 w-full rounded-[8px]" />
                   <div className="flex flex-col gap-[4px] md:gap-[5px] items-start leading-[normal] relative shrink-0 text-black w-full">
                     <p className="font-['Be_Vietnam_Pro'] font-semibold relative shrink-0 text-[18px] md:text-[20px] w-full">
-                      Lúa
+                      {farm.name || 'N/A'}
                     </p>
                     <p className="font-['Be_Vietnam_Pro'] relative shrink-0 text-[13px] md:text-[14px] w-full">
-                      Ngày trồng: 23/10/2023
+                      Ngày trồng: {farm.planting_date ? new Date(farm.planting_date).toLocaleDateString('vi-VN') : 'N/A'}
                     </p>
                     <p className="font-['Be_Vietnam_Pro'] relative shrink-0 text-[13px] md:text-[14px] w-full">
-                      {index === 1 ? "Tình Trạng: Bệnh ...." : "Tình Trạng: Trổ Bông"}
+                      Tình Trạng: {farm.crop_status || 'N/A'}
                     </p>
                   </div>
                   <div className="absolute h-[65px] md:h-[75px] right-[18px] md:right-[20px] bottom-[24px] md:bottom-[28px] w-[62px] md:w-[71px]">
-                    <Image alt="" className="block max-w-none size-full" src={index === 1 ? img : img1} fill />
+                    <Image alt="" className="block max-w-none size-full" src={farm.crop_status?.includes('bệnh') ? img : img1} fill />
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <p className="text-center text-gray-500 w-full py-8">Không có dữ liệu ruộng</p>
+            )}
           </div>
         </div>
 
