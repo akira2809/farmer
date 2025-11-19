@@ -118,16 +118,29 @@ export async function actionRefreshToken() {
     // Get refresh token from cookies
     const refreshToken = (await cookies()).get(APP_CONFIG.cookies.refreshTokenKey);
     
+    console.log('=== REFRESH TOKEN DEBUG ===');
+    console.log('Refresh token from cookies:', refreshToken ? 'EXISTS' : 'NOT FOUND');
+    
     if (!refreshToken) {
+      console.log('❌ No refresh token found in cookies');
       return { success: false, error: 'No refresh token found' };
     }
 
-    // Call refresh API
+    // Call refresh API with refresh token in body
+    console.log('🔄 Calling refresh API...');
     const res = await authApi.refreshToken();
     
+    console.log('Refresh API response:', res);
+    
     if (!res || !res.success) {
+      console.log('❌ Token refresh failed:', res?.message || 'Unknown error');
       return { success: false, error: res?.message || 'Token refresh failed' };
     }
+
+    console.log('✅ Token refresh successful!');
+    console.log('New access token:', res.data.access_token ? 'RECEIVED' : 'MISSING');
+    console.log('New refresh token:', res.data.refresh_token ? 'RECEIVED' : 'NOT RETURNED');
+    console.log('Expires in:', res.data.expires_in || 'NOT SPECIFIED');
 
     // Set new access token
     (await cookies()).set(APP_CONFIG.cookies.tokenKey, res.data.access_token, {
@@ -137,6 +150,8 @@ export async function actionRefreshToken() {
       path: '/',
     });
 
+    console.log('✅ New access token saved to cookies');
+
     // Update refresh token if returned
     if (res.data.refresh_token) {
       (await cookies()).set(APP_CONFIG.cookies.refreshTokenKey, res.data.refresh_token, {
@@ -145,11 +160,18 @@ export async function actionRefreshToken() {
         maxAge: 60 * 60 * 24 * 30,
         path: '/',
       });
+      console.log('✅ New refresh token saved to cookies');
+    } else {
+      console.log('ℹ️ No new refresh token returned, keeping existing one');
     }
 
+    // Revalidate user data
+    revalidateTag('user', 'max');
+
+    console.log('=== REFRESH TOKEN COMPLETE ===');
     return { success: true, data: res.data };
   } catch (error) {
-    console.error('Refresh token error:', error);
+    console.error('❌ Refresh token error:', error);
     return { success: false, error: 'Token refresh failed' };
   }
 }

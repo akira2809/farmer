@@ -65,6 +65,10 @@ export const funcUtils = {
     return getCookie(APP_CONFIG.cookies.tokenKey) as string | undefined;
   },
 
+  getRefreshToken: (): string | undefined => {
+    return getCookie(APP_CONFIG.cookies.refreshTokenKey) as string | undefined;
+  },
+
   /**
    * Checks if a value is empty
    * @param value - Value to check

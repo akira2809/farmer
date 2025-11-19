@@ -130,7 +130,7 @@ export default function ProvinceAutocomplete({
       {isOpen && !disabled && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-0 right-0 z-[9999] mt-1 bg-white border border-[#2e8623] rounded-[18px] shadow-lg max-h-60 overflow-y-auto"
+          className="absolute top-full left-0 right-0 z-9999 mt-1 bg-white border border-[#2e8623] rounded-[18px] shadow-lg max-h-60 overflow-y-auto"
           style={{
             position: 'absolute',
             backgroundColor: 'white',

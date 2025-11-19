@@ -3,8 +3,9 @@ import {
   TLoginResponse,
   TRegisterPayload,
 } from '@/models/auth';
-import useApiPost from '../useApiPost';
-import { API_ROUTE } from '@/common/config';
+import useApiPost from "@/services/useApiPost";
+import { API_ROUTE, APP_CONFIG } from "@/common/config";
+import funcUtils from "@/utils/funcUtils";
 
 export default {
   login: (payload: TLoginPayload): Promise<TLoginResponse> => {
@@ -17,6 +18,8 @@ export default {
     return useApiPost(`${API_ROUTE.auth.logout}`, {});
   },
   refreshToken: (): Promise<TLoginResponse> => {
-    return useApiPost(`${API_ROUTE.auth.refreshToken}`, {});
+    return useApiPost(`${API_ROUTE.auth.refreshToken}`, {
+      refresh_token: funcUtils.getRefreshToken()
+    });
   },
 };
