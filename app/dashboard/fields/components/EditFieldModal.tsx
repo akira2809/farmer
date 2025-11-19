@@ -26,8 +26,9 @@ export default function EditFieldModal({ showModal, onClose, farm }: EditFieldMo
         const data = new FormData(form);
 
         const fieldData: Partial<TCreateFarm> = {
-            crop_type: data.get('crop_type') as string,
             name: data.get('name') as string,
+            crop_type: data.get('crop_type') as string,
+            variety: data.get('variety') as string || undefined,
             area: data.get('area') as string,
             planting_date: data.get('planting_date') as string,
             expected_harvest_date: data.get('expected_harvest_date') as string,
@@ -61,6 +62,22 @@ export default function EditFieldModal({ showModal, onClose, farm }: EditFieldMo
                     <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
                         <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
                             <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
+                                Tên Ruộng
+                            </p>
+                            <input
+                                type="text"
+                                name="name"
+                                defaultValue={farm.name}
+                                className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
+                                placeholder="VD: Ruộng Lúa Đông..."
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+                        <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
+                            <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
                                 Loại Cây
                             </p>
                             <input
@@ -68,7 +85,7 @@ export default function EditFieldModal({ showModal, onClose, farm }: EditFieldMo
                                 name="crop_type"
                                 defaultValue={farm.crop_type}
                                 className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
-                                placeholder="Nhập loại cây..."
+                                placeholder="VD: Lúa, Cà chua..."
                                 required
                             />
                         </div>
@@ -81,11 +98,10 @@ export default function EditFieldModal({ showModal, onClose, farm }: EditFieldMo
                             </p>
                             <input
                                 type="text"
-                                name="name"
-                                defaultValue={farm.name}
+                                name="variety"
+                                defaultValue={farm.variety}
                                 className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
-                                placeholder="Nhập giống cây..."
-                                required
+                                placeholder="VD: OM 18, IR64..."
                             />
                         </div>
                     </div>

@@ -50,8 +50,9 @@ export default function AddFieldModal({ showModal, onClose }: AddFieldModalProps
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const fieldData: TCreateFarm = {
-      crop_type: formData.get('crop_type') as string,
       name: formData.get('name') as string,
+      crop_type: formData.get('crop_type') as string,
+      variety: formData.get('variety') as string || undefined,
       area: formData.get('area') as string,
       planting_date: formData.get('planting_date') as string,
       expected_harvest_date: formData.get('expected_harvest_date') as string,
@@ -81,13 +82,28 @@ export default function AddFieldModal({ showModal, onClose }: AddFieldModalProps
           <div className="box-border flex flex-col gap-[10px] items-start px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
             <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
               <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
+                Tên Ruộng
+              </p>
+              <input 
+                type="text"
+                name="name"
+                className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
+                placeholder="VD: Ruộng Lúa Đông, Vườn Cà Chua..."
+                required
+              />
+            </div>
+          </div>
+
+          <div className="box-border flex flex-col gap-[10px] items-start px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+            <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
+              <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
                 Loại Cây
               </p>
               <input 
                 type="text"
                 name="crop_type"
                 className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
-                placeholder="Nhập loại cây..."
+                placeholder="VD: Lúa, Cà chua, Dưa hấu..."
                 required
               />
             </div>
@@ -100,10 +116,9 @@ export default function AddFieldModal({ showModal, onClose }: AddFieldModalProps
               </p>
               <input 
                 type="text"
-                name="name"
+                name="variety"
                 className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
-                placeholder="Nhập giống cây..."
-                required
+                placeholder="VD: OM 18, IR64, Hoa Vàng..."
               />
             </div>
           </div>

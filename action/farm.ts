@@ -57,6 +57,7 @@ export async function createFarmAction(fieldData: TCreateFarm): Promise<TFarm | 
         ]
       },
       crop_type: fieldData.crop_type,
+      variety: fieldData.variety,
       area: fieldData.area ? parseFloat(fieldData.area) : undefined,
       crop_status: 'preparing', // Backend expects 'preparing' for new farms
       planting_date: new Date(fieldData.planting_date).toISOString(),
@@ -92,6 +93,7 @@ export async function updateFarmAction(id: string, fieldData: Partial<TCreateFar
     const farmPayload: Record<string, string | number | undefined> = {
       name: fieldData.name,
       crop_type: fieldData.crop_type,
+      variety: fieldData.variety,
       area: fieldData.area ? parseFloat(fieldData.area) : undefined,
       planting_date: fieldData.planting_date ? new Date(fieldData.planting_date).toISOString() : undefined,
       expected_harvest_date: fieldData.expected_harvest_date ? new Date(fieldData.expected_harvest_date).toISOString() : undefined

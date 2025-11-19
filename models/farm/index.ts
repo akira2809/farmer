@@ -6,6 +6,7 @@ export interface TFarm {
     coordinates: number[];
   };
   crop_type: string;
+  variety?: string;  // Giống cây (e.g., OM 18, IR64)
   area?: number;
   crop_status: string;
   planting_date: string;
@@ -15,8 +16,9 @@ export interface TFarm {
 }
 
 export interface TCreateFarm {
-  crop_type: string;
-  name: string;
+  name: string;  // Tên ruộng
+  crop_type: string;  // Loại cây
+  variety?: string;  // Giống cây
   area?: string;
   planting_date: string;
   expected_harvest_date: string;
@@ -31,6 +33,7 @@ export interface TCreateFarmRequest {
     coordinates: [number, number];
   };
   crop_type: string;
+  variety?: string;
   area?: number;
   crop_status: 'preparing';
   planting_date: string; // ISO format
