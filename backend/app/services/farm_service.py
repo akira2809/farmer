@@ -273,6 +273,7 @@ class FarmService:
                 "coordinates": farm["location"]["coordinates"]
             },
             crop_type=farm.get("crop_type"),
+            variety=farm.get("variety"),
             area=farm.get("area"),
             crop_status=CropStatus(farm["crop_status"]),
             planting_date=farm.get("planting_date"),

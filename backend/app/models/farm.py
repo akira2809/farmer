@@ -40,6 +40,7 @@ class FarmInDB(BaseModel):
     name: str
     location: GeoJSONPoint
     crop_type: Optional[str] = None
+    variety: Optional[str] = None  # Giống cây (e.g., OM 18, IR64)
     area: Optional[float] = None
     crop_status: CropStatus = CropStatus.PREPARING
     planting_date: Optional[datetime] = None
@@ -61,6 +62,7 @@ class FarmCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
     location: GeoJSONPoint
     crop_type: Optional[str] = Field(None, max_length=100)
+    variety: Optional[str] = Field(None, max_length=100, description="Crop variety (e.g., OM 18, IR64)")
     area: Optional[float] = Field(None, ge=0, description="Area in square meters")
     crop_status: CropStatus = CropStatus.PREPARING
     planting_date: Optional[datetime] = None
@@ -79,6 +81,7 @@ class FarmUpdate(BaseModel):
     """Schema for updating farm information"""
     name: Optional[str] = Field(None, min_length=1, max_length=200)
     crop_type: Optional[str] = Field(None, max_length=100)
+    variety: Optional[str] = Field(None, max_length=100)
     area: Optional[float] = Field(None, ge=0)
     crop_status: Optional[CropStatus] = None
     planting_date: Optional[datetime] = None
@@ -100,6 +103,7 @@ class FarmResponse(BaseModel):
     name: str
     location: GeoJSONPoint
     crop_type: Optional[str] = None
+    variety: Optional[str] = None
     area: Optional[float] = None
     crop_status: CropStatus
     planting_date: Optional[datetime] = None

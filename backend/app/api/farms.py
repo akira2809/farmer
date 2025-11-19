@@ -38,7 +38,9 @@ async def create_farm(
     
     - **name**: Farm name
     - **location**: GeoJSON Point with coordinates [longitude, latitude]
-    - **crop_type**: Type of crop (optional)
+    - **crop_type**: Type of crop (e.g., Lúa, Cà chua) (optional)
+    - **variety**: Crop variety (e.g., OM 18, IR64) (optional)
+    - **area**: Farm area in square meters (optional)
     - **crop_status**: Current crop status (default: preparing)
     - **planting_date**: Date when crop was planted (optional)
     - **expected_harvest_date**: Expected harvest date (optional)
@@ -131,6 +133,8 @@ async def update_farm(
     - **farm_id**: ID of the farm to update
     - **name**: Updated farm name (optional)
     - **crop_type**: Updated crop type (optional)
+    - **variety**: Updated crop variety (optional)
+    - **area**: Updated farm area (optional)
     - **crop_status**: Updated crop status (optional)
     - **planting_date**: Updated planting date (optional)
     - **expected_harvest_date**: Updated expected harvest date (optional)
