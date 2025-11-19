@@ -1,21 +1,48 @@
 "use client";
-
 import { useRouter } from "next/navigation";
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import { actionLogin } from "@/action/auth";
+
 
 const imgImage4 = "https://www.figma.com/api/mcp/asset/06b03577-8601-4e95-a6c7-632f4aa86cf7";
 const imgImage5 = "https://www.figma.com/api/mcp/asset/e44936b8-7287-4b14-b39d-2bc63a299ecf";
 
 export default function SignIn() {
   const router = useRouter();
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // Fake sign in - just navigate to dashboard
-    router.push("/dashboard");
+    setError("");
+    setIsLoading(true);
+
+    try {
+      // Validate inputs
+      if (!phone.trim() || !password.trim()) {
+        setError("Vui lòng nhập số điện thoại và mật khẩu");
+        return;
+      }
+
+      // Call login action
+      const result = await actionLogin(phone.trim(), password);
+
+      if (result.success) {
+        router.push("/dashboard");
+      } else {
+        setError(result.error || "Đăng nhập thất bại");
+      }
+    } catch (err) {
+      setError("Có lỗi xảy ra. Vui lòng thử lại.");
+      console.error("Login error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -46,8 +73,11 @@ export default function SignIn() {
             </p>
             <input 
               type="tel" 
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[50px] md:h-[55px] rounded-[18px] shrink-0 w-full px-4 text-[15px] md:text-[16px]"
               placeholder="Nhập số điện thoại"
+              disabled={isLoading}
             />
           </div>
         </div>
@@ -58,18 +88,35 @@ export default function SignIn() {
             </p>
             <input 
               type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[50px] md:h-[55px] rounded-[18px] shrink-0 w-full px-4 text-[15px] md:text-[16px]"
               placeholder="Nhập mật khẩu"
+              disabled={isLoading}
             />
           </div>
         </div>
+        
+        {/* Error Display */}
+        {error && (
+          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-0 md:px-[40px] lg:px-[80px] py-0 relative shrink-0 w-full">
+            <div className="bg-red-50 border border-red-200 rounded-[12px] p-3 w-full">
+              <p className="text-red-600 text-[14px] text-center">{error}</p>
+            </div>
+          </div>
+        )}
+        
         <div className="box-border flex flex-col gap-[10px] items-start pb-0 pt-[16px] px-0 relative shrink-0 w-full">
           <div className="box-border flex flex-col gap-[10px] items-start px-0 md:px-[60px] lg:px-[100px] py-0 relative shrink-0 w-full">
-            <button type="submit" className="bg-[#2e8623] border border-[#fffcf6] border-solid box-border flex gap-[15px] md:gap-[20px] h-[60px] md:h-[65px] items-center justify-center px-[20px] md:px-[25px] py-[15px] md:py-[20px] relative rounded-[20px] shrink-0 w-full hover:bg-[#267019] transition-colors">
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className="bg-[#2e8623] border border-[#fffcf6] border-solid box-border flex gap-[15px] md:gap-[20px] h-[60px] md:h-[65px] items-center justify-center px-[20px] md:px-[25px] py-[15px] md:py-[20px] relative rounded-[20px] shrink-0 w-full hover:bg-[#267019] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[16px] md:text-[18px] text-[#ebf5ed]">
-                Đăng Nhập
+                {isLoading ? "Đang đăng nhập..." : "Đăng Nhập"}
               </p>
-              <ArrowRight className="size-[20px] md:size-[24px] text-[#ebf5ed]" />
+              {!isLoading && <ArrowRight className="size-[20px] md:size-[24px] text-[#ebf5ed]" />}
             </button>
           </div>
           <div className="box-border flex flex-col gap-[10px] items-start px-0 md:px-[60px] lg:px-[100px] py-0 relative shrink-0 w-full">
