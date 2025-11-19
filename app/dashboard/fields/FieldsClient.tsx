@@ -3,20 +3,40 @@
 import Sidebar from "../Sidebar";
 import Image from "next/image";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { TFarm } from "@/models/farm";
 import AddFieldModal from "./components/AddFieldModal";
+import EditFieldModal from "./components/EditFieldModal";
+import { deleteFarmAction } from "@/action/farm";
 
 const img1 = "https://www.figma.com/api/mcp/asset/0f961402-38df-4a20-a6fe-dc4ea536b4a6";
 const img2 = "https://www.figma.com/api/mcp/asset/45a84cac-4791-4ebf-9f34-1f34823bfc73";
 
 export default function FieldsClient({ fields }: { fields: TFarm[] }) {
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedFarm, setSelectedFarm] = useState<TFarm | null>(null);
 
-  const handleAddField = (fieldData: any) => {
-    console.log('Adding field:', fieldData);
-    // TODO: Add API call to create farm
+  const handleEditClick = (e: React.MouseEvent, farm: TFarm) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedFarm(farm);
+    setShowEditModal(true);
+  };
+
+  const handleDeleteClick = async (e: React.MouseEvent, farmId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (window.confirm("Bạn có chắc chắn muốn xóa ruộng này không?")) {
+      const success = await deleteFarmAction(farmId);
+      if (success) {
+        window.location.reload();
+      } else {
+        alert("Xóa ruộng thất bại. Vui lòng thử lại.");
+      }
+    }
   };
 
   return (
@@ -30,9 +50,9 @@ export default function FieldsClient({ fields }: { fields: TFarm[] }) {
             <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[28px] md:text-[36px] text-black text-center w-full">
               Ruộng Của Bạn
             </p>
-            
+
             <div className="flex gap-[10px] items-start justify-end relative shrink-0 w-full max-w-[1059px]">
-              <button 
+              <button
                 onClick={() => setShowModal(true)}
                 className="bg-[#2e8623] border border-[#fffcf6] border-solid box-border flex gap-[12px] md:gap-[15px] items-center justify-center px-[18px] md:px-[22px] py-[14px] md:py-[18px] relative rounded-[22px] shrink-0 hover:bg-[#267019] transition-colors"
               >
@@ -45,22 +65,46 @@ export default function FieldsClient({ fields }: { fields: TFarm[] }) {
 
             <div className="flex flex-wrap gap-[25px] md:gap-[30px] items-start justify-start relative shrink-0 w-full max-w-[1059px]">
               {fields?.length > 0 ? fields.map((field) => (
-                <Link 
+                <Link
                   key={field.id || field.name}
                   href={`/dashboard/fields/${field.id}`}
-                  className="bg-[#fffcf6] border-2 border-[#2e8623] border-solid relative rounded-[14.09px] shrink-0 w-full sm:w-[calc(50%-12.5px)] lg:w-[332.691px] hover:shadow-lg transition-shadow"
+                  className="bg-[#fffcf6] border-2 border-[#2e8623] border-solid relative rounded-[14.09px] shrink-0 w-full sm:w-[calc(50%-12.5px)] lg:w-[332.691px] hover:shadow-lg transition-shadow group"
                 >
                   <div className="box-border flex flex-col gap-[20px] md:gap-[23.484px] items-center overflow-clip pb-[28px] md:pb-[35.226px] pt-[18px] md:pt-[23.484px] px-[18px] md:px-[23.484px] relative rounded-[inherit]">
                     <div className="bg-[#d9d9d9] h-[140px] md:h-[165.954px] shrink-0 w-full rounded-[8px]" />
                     <div className="flex flex-col gap-[5px] md:gap-[6.262px] items-start leading-[normal] relative shrink-0 text-black w-full">
-                      <p className="font-['Be_Vietnam_Pro'] font-semibold relative shrink-0 text-[20px] md:text-[25.05px] w-full">
-                        {field.name || 'N/A'}
-                      </p>
+                      <div className="flex justify-between items-start w-full">
+                        <p className="font-['Be_Vietnam_Pro'] font-semibold relative shrink-0 text-[20px] md:text-[25.05px]">
+                          {field.name || 'N/A'}
+                        </p>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={(e) => handleEditClick(e, field)}
+                            className="p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
+                            title="Sửa thông tin"
+                          >
+                            <Pencil size={18} className="text-[#2e8623]" />
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteClick(e, field.id)}
+                            className="p-2 hover:bg-red-50 rounded-full transition-colors z-10"
+                            title="Xóa ruộng"
+                          >
+                            <Trash2 size={18} className="text-red-500" />
+                          </button>
+                        </div>
+                      </div>
                       <p className="font-['Be_Vietnam_Pro'] relative shrink-0 text-[14px] md:text-[15.656px] w-full">
                         Ngày trồng: {field.planting_date ? new Date(field.planting_date).toLocaleDateString('vi-VN') : 'N/A'}
                       </p>
                       <p className="font-['Be_Vietnam_Pro'] relative shrink-0 text-[14px] md:text-[15.656px] w-full">
                         Tình Trạng: {field.crop_status || 'N/A'}
+                      </p>
+                      <p className="font-['Be_Vietnam_Pro'] relative shrink-0 text-[14px] md:text-[15.656px] w-full">
+                        Loại cây: {field.crop_type || 'N/A'}
+                      </p>
+                      <p className="font-['Be_Vietnam_Pro'] relative shrink-0 text-[14px] md:text-[15.656px] w-full">
+                        Diện tích: {field.area ? `${field.area} m²` : 'N/A'}
                       </p>
                     </div>
                     <div className="absolute h-[75px] md:h-[88.214px] right-[20px] md:right-[24px] bottom-[28px] md:bottom-[35px] w-[71px] md:w-[83.759px]">
@@ -74,11 +118,17 @@ export default function FieldsClient({ fields }: { fields: TFarm[] }) {
             </div>
           </div>
         </div>
-      </div>
+      </div >
 
-      <AddFieldModal 
+      <AddFieldModal
         showModal={showModal}
         onClose={() => setShowModal(false)}
+      />
+
+      <EditFieldModal
+        showModal={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        farm={selectedFarm}
       />
     </>
   );

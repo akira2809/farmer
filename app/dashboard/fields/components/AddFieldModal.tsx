@@ -1,6 +1,18 @@
 import Image from "next/image";
 import {TFarm, TCreateFarm} from "@/models/farm";
 import { createFarmAction } from "@/action/farm";
+import dynamic from 'next/dynamic';
+import { useState } from 'react';
+
+// Import Dynamic để tắt SSR cho Map
+const MapPicker = dynamic(() => import('@/components/ui/MapPicker'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[300px] w-full bg-gray-100 animate-pulse rounded-[18px] flex items-center justify-center">
+      <p className="text-gray-500 font-['Be_Vietnam_Pro']">Đang tải bản đồ...</p>
+    </div>
+  ),
+});
 
 async function handleAddField(fieldData: TCreateFarm): Promise<TFarm | null> {
   try {
@@ -18,7 +30,21 @@ interface AddFieldModalProps {
 }
 
 export default function AddFieldModal({ showModal, onClose }: AddFieldModalProps) {
+  const [locationData, setLocationData] = useState({
+    address: '',
+    latitude: '',
+    longitude: '',
+  });
+
   if (!showModal) return null;
+
+  const handleMapSelect = (address: string, lat: number, lng: number) => {
+    setLocationData({
+      address,
+      latitude: lat.toString(),
+      longitude: lng.toString(),
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,8 +55,8 @@ export default function AddFieldModal({ showModal, onClose }: AddFieldModalProps
       area: formData.get('area') as string,
       planting_date: formData.get('planting_date') as string,
       expected_harvest_date: formData.get('expected_harvest_date') as string,
-      latitude: formData.get('latitude') as string,
-      longitude: formData.get('longitude') as string,
+      latitude: locationData.latitude || (formData.get('latitude') as string),
+      longitude: locationData.longitude || (formData.get('longitude') as string),
     };
     
     const result = await handleAddField(fieldData);
@@ -44,15 +70,15 @@ export default function AddFieldModal({ showModal, onClose }: AddFieldModalProps
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-100 p-4">
-      <div className="bg-white box-border flex flex-col gap-[25px] md:gap-[30px] items-start justify-center pb-[40px] md:pb-[50px] pt-[60px] md:pt-[80px] px-0 relative rounded-[18px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-full max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <div className="flex gap-[20px] md:gap-[30px] items-center justify-center relative shrink-0 w-full">
-          <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[36px] md:text-[48px] text-black text-center">
+      <div className="bg-white box-border flex flex-col gap-[25px] md:gap-[30px] items-start pb-[40px] md:pb-[50px] pt-[30px] md:pt-[40px] px-0 relative rounded-[18px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-full max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <div className="flex gap-[20px] md:gap-[30px] items-center justify-center relative shrink-0 w-full px-[50px] md:px-[70px]">
+          <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[32px] md:text-[40px] text-black text-center">
             Thêm Ruộng
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-[25px] w-full">
-          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+          <div className="box-border flex flex-col gap-[10px] items-start px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
             <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
               <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
                 Loại Cây
@@ -67,7 +93,7 @@ export default function AddFieldModal({ showModal, onClose }: AddFieldModalProps
             </div>
           </div>
 
-          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+          <div className="box-border flex flex-col gap-[10px] items-start px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
             <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
               <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
                 Giống Cây
@@ -82,7 +108,7 @@ export default function AddFieldModal({ showModal, onClose }: AddFieldModalProps
             </div>
           </div>
 
-          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+          <div className="box-border flex flex-col gap-[10px] items-start px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
             <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
               <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
                 Diện Tích
@@ -97,36 +123,40 @@ export default function AddFieldModal({ showModal, onClose }: AddFieldModalProps
             </div>
           </div>
 
-          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
-            <div className="flex flex-col md:flex-row gap-[15px] items-start relative shrink-0 w-full">
-              <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full md:w-1/2">
-                <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
-                  Vĩ Độ (Latitude)
-                </p>
-                <input 
-                  type="number"
-                  name="latitude"
-                  step="any"
-                  className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
-                  placeholder="10.762622"
-                />
-              </div>
-              <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full md:w-1/2">
-                <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
-                  Kinh Độ (Longitude)
-                </p>
-                <input 
-                  type="number"
-                  name="longitude"
-                  step="any"
-                  className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
-                  placeholder="106.660172"
-                />
+          <div className="box-border flex flex-col gap-[10px] items-start px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+            <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
+              <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
+                Vị Trí Ruộng
+              </p>
+              <div className="w-full">
+                <MapPicker onAddressFound={handleMapSelect} />
               </div>
             </div>
           </div>
 
-          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+          {/* Hidden inputs để lưu tọa độ */}
+          <input type="hidden" name="latitude" value={locationData.latitude} />
+          <input type="hidden" name="longitude" value={locationData.longitude} />
+
+          {/* Hiển thị tọa độ đã chọn (optional - có thể ẩn) */}
+          {locationData.latitude && locationData.longitude && (
+            <div className="box-border flex flex-col gap-[10px] items-start px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+              <div className="flex gap-[15px] items-center w-full">
+                <div className="flex-1">
+                  <p className="text-sm font-['Be_Vietnam_Pro'] text-gray-600">
+                    Vĩ độ: <span className="font-semibold text-[#191f19]">{parseFloat(locationData.latitude).toFixed(6)}</span>
+                  </p>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-['Be_Vietnam_Pro'] text-gray-600">
+                    Kinh độ: <span className="font-semibold text-[#191f19]">{parseFloat(locationData.longitude).toFixed(6)}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="box-border flex flex-col gap-[10px] items-start px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
             <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
               <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
                 Ngày Trồng
@@ -140,7 +170,7 @@ export default function AddFieldModal({ showModal, onClose }: AddFieldModalProps
             </div>
           </div>
 
-          <div className="box-border flex flex-col gap-[10px] items-center overflow-clip px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+          <div className="box-border flex flex-col gap-[10px] items-center px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
             <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
               <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
                 Ngày Thu Hoạch Dự Kiến

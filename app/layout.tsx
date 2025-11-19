@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Be_Vietnam_Pro } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -60,6 +61,12 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className={`${playfair.variable} ${beVietnam.variable} antialiased`}>
+        <Toaster 
+          position="top-right" 
+          richColors 
+          closeButton
+          duration={3000}
+        />
         {children}
       </body>
     </html>

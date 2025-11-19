@@ -37,3 +37,31 @@ h1, h2, h3, h4, h5, h6 {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* Leaflet Map Container Fix - Prevent expansion on click */
+.leaflet-container {
+  width: 100% !important;
+  height: 300px !important;
+  max-width: 100% !important;
+  position: relative !important;
+}
+
+.leaflet-container * {
+  max-width: none !important;
+}
+
+/* Ensure map doesn't overflow its container */
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+}

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Camera, SquarePen } from "lucide-react";
 import { TFarm } from "@/models/farm";
 import DiseaseDetectionModal from './components/DiseaseDetectionModal';
+import CropStatusSelector from './components/CropStatusSelector';
 
 interface FieldDetailClientProps {
   farm: TFarm | null;
@@ -12,12 +13,22 @@ interface FieldDetailClientProps {
 
 export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentFarm, setCurrentFarm] = useState<TFarm | null>(farm);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
 
-  if (!farm) {
+  const handleStatusUpdated = (newStatus: string) => {
+    if (currentFarm) {
+      setCurrentFarm({
+        ...currentFarm,
+        crop_status: newStatus
+      });
+    }
+  };
+
+  if (!currentFarm) {
     return (
       <div className="bg-[#fffcf6] flex flex-col md:flex-row items-start relative min-h-screen w-full overflow-hidden">
         <Sidebar activePage="fields" />
@@ -41,7 +52,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
         <div className="flex flex-col gap-[12px] md:gap-[14px] items-center relative shrink-0 w-full">
           <div className="flex gap-[20px] md:gap-[30px] items-center justify-center relative shrink-0 w-full">
             <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[36px] md:text-[48px] text-black text-center">
-              {farm.name || 'Ruộng Lúa'}
+              {currentFarm.name || 'Ruộng Lúa'}
             </p>
             <button className="bg-[#2e8623] box-border flex flex-col gap-[10px] items-start justify-center overflow-clip p-[12px] md:p-[15px] relative rounded-[50px] shrink-0 hover:bg-[#267019] transition-colors">
               <SquarePen className="size-[16px] md:size-[18.996px] text-[#fffcf6]" />
@@ -66,7 +77,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 </p>
                 <input 
                   type="text"
-                  defaultValue={farm.crop_type || 'Lúa'}
+                  defaultValue={currentFarm.crop_type || 'Lúa'}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
                 />
               </div>
@@ -79,7 +90,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 </p>
                 <input 
                   type="text"
-                  defaultValue={farm.name || 'OM 18'}
+                  defaultValue={currentFarm.name || 'OM 18'}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
                 />
               </div>
@@ -92,7 +103,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 </p>
                 <input 
                   type="text"
-                  defaultValue={farm.location ? `${farm.location.coordinates[0]}, ${farm.location.coordinates[1]}` : '2000m²'}
+                  defaultValue={currentFarm.location ? `${currentFarm.location.coordinates[0]}, ${currentFarm.location.coordinates[1]}` : '2000m²'}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
                 />
               </div>
@@ -105,7 +116,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 </p>
                 <input 
                   type="date"
-                  defaultValue={farm.planting_date ? farm.planting_date.split('T')[0] : '2023-10-23'}
+                  defaultValue={currentFarm.planting_date ? currentFarm.planting_date.split('T')[0] : '2023-10-23'}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
                 />
               </div>
@@ -118,7 +129,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 </p>
                 <input 
                   type="date"
-                  defaultValue={farm.expected_harvest_date ? farm.expected_harvest_date.split('T')[0] : '2024-02-15'}
+                  defaultValue={currentFarm.expected_harvest_date ? currentFarm.expected_harvest_date.split('T')[0] : '2024-02-15'}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
                 />
               </div>
@@ -145,16 +156,11 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
           {/* Right Column - Status and History */}
           <div className="box-border flex flex-col gap-[30px] md:gap-[40px] items-center overflow-clip px-[30px] md:px-[70px] py-0 relative shrink-0">
             <div className="flex flex-col gap-[12px] md:gap-[15px] items-start relative shrink-0 w-full">
-              <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
-                <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
-                  Trạng Thái
-                </p>
-                <input 
-                  type="text"
-                  defaultValue={farm.crop_status || 'Đang bệnh'}
-                  className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
-                />
-              </div>
+              <CropStatusSelector 
+                farmId={currentFarm.id}
+                currentStatus={currentFarm.crop_status}
+                onStatusUpdated={handleStatusUpdated}
+              />
               <div className="bg-[#ffd2d2] box-border flex flex-col gap-[6px] items-start overflow-clip pb-[12px] pt-[18px] px-[28px] md:px-[38px] relative rounded-[18px] shrink-0 w-full">
                 <p className="font-['Be_Vietnam_Pro'] leading-[normal] relative shrink-0 text-[16px] md:text-[20px] text-black w-full">
                   Đang bệnh, bạn hãy chú ý bón phân đầy đủ cho....
@@ -191,8 +197,8 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
       <DiseaseDetectionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        farmId={farm.id}
-        cropType={farm.crop_type}
+        farmId={currentFarm.id}
+        cropType={currentFarm.crop_type}
       />
     </div>
   );

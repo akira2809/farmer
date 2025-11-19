@@ -1,6 +1,7 @@
 import { getTokenUser } from '@/action/utils';
 import { TResponseData } from '@/models/global';
 import funcUtils, { TParams } from '@/utils/funcUtils';
+import { fetchWithAuth } from './fetchWithAuth';
 
 /**
  * Custom hook for making GET API requests
@@ -22,10 +23,14 @@ const useApiGet = async <Response = unknown>(
     const token = isServer ? await getTokenUser() : undefined;
     const endpoint = funcUtils.combineURL(url, query);
     
-    const response = await fetch(endpoint, {
+    const response = await fetchWithAuth(endpoint, {
       method: 'GET',
       ...funcUtils.FetchHeaders(token, isCache, tag),
     });
+
+    if (!response) {
+      return undefined; // 401 đã được xử lý bởi fetchWithAuth
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

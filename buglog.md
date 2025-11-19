@@ -1,5 +1,12 @@
 # BUG LOG + CHECK LIST VIỆC ĐÃ LÀM 
 
+
+
+load api thời tiết hơi lâu vs chưa xong trong http://localhost:3000/dashboard/weather
+
+
+
+
 Lỗi AI detect-disease khi gửi 1 ảnh bất kì không liên quan nó vẫn chuẩn đoán được
 
 thiếu api sửa thông tin người dùng
@@ -19,16 +26,16 @@ farm Management
 - [x] create farm
 - [x] get farm
 - [x] get farms
-- [ ] update farm
-- [ ] update crop status
+- [x] update farm
+- [x] update crop status
 
 notification 
-- [ ] get notifications
-- [ ] mark notification as read
+- [x] get notifications
+- [x] mark notification as read
 
 weather 
-- [ ] get weather
-- [ ] get weather forecast
+- [x] get weather (by coordinates)
+- [x] get weather forecast (by farm)
  
 AI 
 - [ ] chat with AI
@@ -36,4 +43,6 @@ AI
 - [ ]  check health
 
 
-
+profile
+- [x] update profile
+- [x] change password
