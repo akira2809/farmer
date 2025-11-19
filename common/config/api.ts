@@ -43,5 +43,11 @@ export default {
         getNotifications : `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/notifications`,
         // PATCH: Mark notification as read
         updateNotification : `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/notifications/:notificationId/read`,
+    },
+    Location : {
+        // GET: Get all provinces/cities from open-api.vn
+        getProvinces : 'https://provinces.open-api.vn/api/v2/',
+        // GET: Search provinces/cities by keyword (sử dụng "?q=" để tìm kiếm)
+        searchProvinces : 'https://provinces.open-api.vn/api/v2/?q=',
     }
 }

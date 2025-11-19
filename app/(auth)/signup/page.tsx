@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { actionRegister } from "@/action/auth";
+import ProvinceAutocomplete from "@/components/ProvinceAutocomplete";
+import { clientAuthUtils } from "@/utils/clientAuth";
 
 const imgImage4 = "https://www.figma.com/api/mcp/asset/bcd561a1-0e13-41f1-9834-eff8b80b7bfc";
 const imgImage5 = "https://www.figma.com/api/mcp/asset/dc323571-582f-4fed-bac6-68f4bf53946d";
@@ -51,6 +53,7 @@ export default function SignUp() {
       );
 
       if (result.success) {
+        // Token is automatically saved to cookies by server action
         router.push("/dashboard");
       } else {
         setError(result.error || "Đăng ký thất bại");
@@ -99,16 +102,14 @@ export default function SignUp() {
             />
           </div>
         </div>
-        <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-0 md:px-[40px] lg:px-[80px] py-0 relative shrink-0 w-full">
+        <div className="box-border flex flex-col gap-[10px] items-start px-0 md:px-[40px] lg:px-[80px] py-0 relative shrink-0 w-full">
           <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
             <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[16px] md:text-[18px] text-[#191f19] w-full">
               Tỉnh/Thành Phố
             </p>
-            <input 
-              type="text" 
+            <ProvinceAutocomplete
               value={province}
-              onChange={(e) => setProvince(e.target.value)}
-              className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[50px] md:h-[55px] rounded-[18px] shrink-0 w-full px-4 text-[15px] md:text-[16px]"
+              onChange={setProvince}
               placeholder="Chọn tỉnh/thành phố"
               disabled={isLoading}
             />

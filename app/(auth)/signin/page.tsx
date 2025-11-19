@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { actionLogin } from "@/action/auth";
+import { clientAuthUtils } from "@/utils/clientAuth";
 
 
 const imgImage4 = "https://www.figma.com/api/mcp/asset/06b03577-8601-4e95-a6c7-632f4aa86cf7";
@@ -31,8 +32,9 @@ export default function SignIn() {
 
       // Call login action
       const result = await actionLogin(phone.trim(), password);
-
+      
       if (result.success) {
+        // Token is automatically saved to cookies by server action
         router.push("/dashboard");
       } else {
         setError(result.error || "Đăng nhập thất bại");

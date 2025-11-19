@@ -13,4 +13,10 @@ export default {
   register: (payload: TRegisterPayload): Promise<TLoginResponse> => {
     return useApiPost(`${API_ROUTE.auth.register}`, payload);
   },
+  logout: (): Promise<{ success: boolean }> => {
+    return useApiPost(`${API_ROUTE.auth.logout}`, {});
+  },
+  refreshToken: (): Promise<TLoginResponse> => {
+    return useApiPost(`${API_ROUTE.auth.refreshToken}`, {});
+  },
 };
