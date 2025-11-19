@@ -1,0 +1,183 @@
+import Image from "next/image";
+import {TFarm, TCreateFarm} from "@/models/farm";
+import { createFarmAction } from "@/action/farm";
+
+async function handleAddField(fieldData: TCreateFarm): Promise<TFarm | null> {
+  try {
+    const result = await createFarmAction(fieldData);
+    return result;
+  } catch (error) {
+    console.error('Error adding field:', error);
+    return null;
+  }
+}
+
+interface AddFieldModalProps {
+  showModal: boolean;
+  onClose: () => void;
+}
+
+export default function AddFieldModal({ showModal, onClose }: AddFieldModalProps) {
+  if (!showModal) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    const fieldData: TCreateFarm = {
+      crop_type: formData.get('crop_type') as string,
+      name: formData.get('name') as string,
+      area: formData.get('area') as string,
+      planting_date: formData.get('planting_date') as string,
+      expected_harvest_date: formData.get('expected_harvest_date') as string,
+      latitude: formData.get('latitude') as string,
+      longitude: formData.get('longitude') as string,
+    };
+    
+    const result = await handleAddField(fieldData);
+    if (result) {
+      onClose();
+      window.location.reload();
+    } else {
+      alert('Có lỗi xảy ra khi tạo ruộng. Vui lòng thử lại.');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-100 p-4">
+      <div className="bg-white box-border flex flex-col gap-[25px] md:gap-[30px] items-start justify-center pb-[40px] md:pb-[50px] pt-[60px] md:pt-[80px] px-0 relative rounded-[18px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-full max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <div className="flex gap-[20px] md:gap-[30px] items-center justify-center relative shrink-0 w-full">
+          <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[36px] md:text-[48px] text-black text-center">
+            Thêm Ruộng
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-[25px] w-full">
+          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+            <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
+              <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
+                Loại Cây
+              </p>
+              <input 
+                type="text"
+                name="crop_type"
+                className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
+                placeholder="Nhập loại cây..."
+                required
+              />
+            </div>
+          </div>
+
+          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+            <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
+              <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
+                Giống Cây
+              </p>
+              <input 
+                type="text"
+                name="name"
+                className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
+                placeholder="Nhập giống cây..."
+                required
+              />
+            </div>
+          </div>
+
+          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+            <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
+              <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
+                Diện Tích
+              </p>
+              <input 
+                type="text"
+                name="area"
+                className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
+                placeholder="Nhập diện tích..."
+                required
+              />
+            </div>
+          </div>
+
+          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+            <div className="flex flex-col md:flex-row gap-[15px] items-start relative shrink-0 w-full">
+              <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full md:w-1/2">
+                <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
+                  Vĩ Độ (Latitude)
+                </p>
+                <input 
+                  type="number"
+                  name="latitude"
+                  step="any"
+                  className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
+                  placeholder="10.762622"
+                />
+              </div>
+              <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full md:w-1/2">
+                <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
+                  Kinh Độ (Longitude)
+                </p>
+                <input 
+                  type="number"
+                  name="longitude"
+                  step="any"
+                  className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
+                  placeholder="106.660172"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+            <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
+              <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
+                Ngày Trồng
+              </p>
+              <input 
+                type="date"
+                name="planting_date"
+                className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="box-border flex flex-col gap-[10px] items-center overflow-clip px-[50px] md:px-[70px] py-0 relative shrink-0 w-full">
+            <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
+              <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
+                Ngày Thu Hoạch Dự Kiến
+              </p>
+              <input 
+                type="date"
+                name="expected_harvest_date"
+                className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
+                required
+              />
+            </div>
+
+            <div className="h-[15px] w-[36px] opacity-0" />
+            
+            <div className="flex gap-3 w-full">
+              <button
+                type="button"
+                onClick={onClose}
+                className="bg-[#ebf5ed] border border-[#2e8623] border-solid box-border flex gap-[15px] md:gap-[20px] items-center justify-center px-[20px] md:px-[25px] py-[16px] md:py-[20px] relative rounded-[20px] flex-1 hover:bg-[#d5e5d1] transition-colors"
+              >
+                <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[17px] md:text-[20px] text-[#191f19]">
+                  Hủy
+                </p>
+              </button>
+              
+              <button
+                type="submit"
+                className="bg-[#2e8623] border border-[#fffcf6] border-solid box-border flex gap-[15px] md:gap-[20px] items-center justify-center px-[20px] md:px-[25px] py-[16px] md:py-[20px] relative rounded-[20px] flex-1 hover:bg-[#267019] transition-colors"
+              >
+                <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[17px] md:text-[20px] text-[#ebf5ed]">
+                  Xác Nhận
+                </p>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

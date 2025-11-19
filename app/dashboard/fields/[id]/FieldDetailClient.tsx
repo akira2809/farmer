@@ -95,7 +95,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 </p>
                 <input 
                   type="date"
-                  defaultValue={farm.planting_date || '2023-10-23'}
+                  defaultValue={farm.planting_date ? farm.planting_date.split('T')[0] : '2023-10-23'}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
                 />
               </div>
@@ -108,7 +108,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 </p>
                 <input 
                   type="date"
-                  defaultValue={farm.expected_harvest_date || '2024-02-15'}
+                  defaultValue={farm.expected_harvest_date ? farm.expected_harvest_date.split('T')[0] : '2024-02-15'}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
                 />
               </div>
