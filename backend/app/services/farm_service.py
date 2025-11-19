@@ -225,6 +225,35 @@ class FarmService:
         farms = await cursor.to_list(length=None)
         return [self._farm_to_response(farm) for farm in farms]
 
+    async def delete_farm(self, farm_id: str) -> bool:
+        """
+        Delete a farm by its ID
+        
+        Args:
+            farm_id: ID of the farm to delete
+            
+        Returns:
+            bool: True if deleted successfully
+            
+        Raises:
+            HTTPException: If farm not found
+        """
+        if not ObjectId.is_valid(farm_id):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Farm not found"
+            )
+        
+        result = await self.collection.delete_one({"_id": ObjectId(farm_id)})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Farm not found"
+            )
+            
+        return True
+
     def _farm_to_response(self, farm: dict) -> FarmResponse:
         """
         Convert MongoDB farm document to FarmResponse
@@ -244,6 +273,7 @@ class FarmService:
                 "coordinates": farm["location"]["coordinates"]
             },
             crop_type=farm.get("crop_type"),
+            area=farm.get("area"),
             crop_status=CropStatus(farm["crop_status"]),
             planting_date=farm.get("planting_date"),
             expected_harvest_date=farm.get("expected_harvest_date"),

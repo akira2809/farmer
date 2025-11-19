@@ -7,7 +7,7 @@ from bson import ObjectId
 
 from app.core.config import settings
 from app.core.database import get_database
-from app.models.user import UserInDB, UserRegistration, LoginCredentials, TokenResponse, UserResponse
+from app.models.user import UserInDB, UserRegistration, LoginCredentials, TokenResponse, UserResponse, UserProfileUpdate, ChangePasswordRequest
 from app.models.refresh_token import RefreshTokenInDB
 
 
@@ -215,3 +215,82 @@ class AuthService:
             token_type="bearer",
             expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
         )
+    
+    async def get_user_profile(self, user_id: str) -> UserResponse:
+        """Get user profile by ID"""
+        user_doc = await self.db.users.find_one({"_id": ObjectId(user_id)})
+        if user_doc is None:
+            raise ValueError("User not found")
+        
+        user = UserInDB(**user_doc)
+        return UserResponse(
+            id=str(user.id),
+            full_name=user.full_name,
+            phone=user.phone,
+            province=user.province,
+            created_at=user.created_at
+        )
+    
+    async def update_user_profile(self, user_id: str, profile_data: UserProfileUpdate) -> UserResponse:
+        """Update user profile"""
+        # Check if user exists
+        user_doc = await self.db.users.find_one({"_id": ObjectId(user_id)})
+        if user_doc is None:
+            raise ValueError("User not found")
+        
+        # Build update data (only include fields that are provided)
+        update_data = {}
+        if profile_data.full_name is not None:
+            update_data["full_name"] = profile_data.full_name
+        if profile_data.province is not None:
+            update_data["province"] = profile_data.province
+        
+        # If no fields to update, return current profile
+        if not update_data:
+            raise ValueError("No fields to update")
+        
+        # Update user in database
+        await self.db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": update_data}
+        )
+        
+        # Get updated user
+        updated_user_doc = await self.db.users.find_one({"_id": ObjectId(user_id)})
+        updated_user = UserInDB(**updated_user_doc)
+        
+        return UserResponse(
+            id=str(updated_user.id),
+            full_name=updated_user.full_name,
+            phone=updated_user.phone,
+            province=updated_user.province,
+            created_at=updated_user.created_at
+        )
+    
+    async def change_password(self, user_id: str, password_data: ChangePasswordRequest) -> bool:
+        """Change user password"""
+        # Get user
+        user_doc = await self.db.users.find_one({"_id": ObjectId(user_id)})
+        if user_doc is None:
+            raise ValueError("User not found")
+        
+        user = UserInDB(**user_doc)
+        
+        # Verify current password
+        if not self.verify_password(password_data.current_password, user.password_hash):
+            raise ValueError("Current password is incorrect")
+        
+        # Check if new password is same as current
+        if self.verify_password(password_data.new_password, user.password_hash):
+            raise ValueError("New password must be different from current password")
+        
+        # Hash new password
+        new_password_hash = self.hash_password(password_data.new_password)
+        
+        # Update password in database
+        await self.db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"password_hash": new_password_hash}}
+        )
+        
+        return True

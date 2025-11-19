@@ -115,7 +115,7 @@ async def get_farm(
         )
 
 
-@router.patch(
+@router.put(
     "/{farm_id}",
     response_model=APIResponse[FarmResponse]
 )
@@ -162,7 +162,7 @@ async def update_farm(
         )
 
 
-@router.patch(
+@router.put(
     "/{farm_id}/status",
     response_model=APIResponse[FarmResponse]
 )
@@ -197,4 +197,40 @@ async def update_crop_status(
         return error_response(
             message=e.detail,
             code="STATUS_UPDATE_FAILED"
+        )
+
+
+@router.delete(
+    "/{farm_id}",
+    response_model=APIResponse[Dict[str, str]]
+)
+async def delete_farm(
+    farm_id: str,
+    current_user: UserInDB = Depends(get_current_user),
+    farm_service: FarmService = Depends(get_farm_service)
+) -> Dict[str, Any]:
+    """
+    Delete a farm (authenticated).
+    
+    - **farm_id**: ID of the farm to delete
+    """
+    # Verify ownership
+    is_owner = await farm_service.verify_farm_ownership(str(current_user.id), farm_id)
+    
+    if not is_owner:
+        return error_response(
+            message="You do not have permission to delete this farm",
+            code="FORBIDDEN"
+        )
+    
+    try:
+        await farm_service.delete_farm(farm_id)
+        return success_response(
+            data={"id": farm_id},
+            message="Farm deleted successfully"
+        )
+    except HTTPException as e:
+        return error_response(
+            message=e.detail,
+            code="FARM_DELETION_FAILED"
         )

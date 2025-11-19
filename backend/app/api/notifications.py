@@ -66,7 +66,7 @@ async def get_notifications(
     )
 
 
-@router.patch(
+@router.put(
     "/{notification_id}/read",
     response_model=APIResponse[NotificationResponse]
 )

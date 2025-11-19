@@ -62,8 +62,9 @@ class UserRegistration(BaseModel):
             raise ValueError('Full name cannot be empty or whitespace only')
         if len(v) < 2:
             raise ValueError('Full name must be at least 2 characters')
-        if not re.match(r'^[a-zA-ZÀ-ỹ\s]+$', v):
-            raise ValueError('Full name can only contain letters and spaces')
+        # Allow letters (including Vietnamese), numbers, and spaces
+        if not re.match(r'^[a-zA-ZÀ-ỹ0-9\s]+$', v):
+            raise ValueError('Full name can only contain letters, numbers and spaces')
         return v
     
     @field_validator('phone')
@@ -184,3 +185,98 @@ class RefreshTokenRequest(BaseModel):
         if len(v) < 10:
             raise ValueError('Invalid refresh token format')
         return v
+
+
+class UserProfileUpdate(BaseModel):
+    """User profile update request schema"""
+    full_name: Optional[str] = Field(
+        None,
+        min_length=2,
+        max_length=100,
+        description="Full name (2-100 characters)"
+    )
+    province: Optional[str] = Field(
+        None,
+        min_length=2,
+        max_length=100,
+        description="Province/City name"
+    )
+    
+    @field_validator('full_name')
+    @classmethod
+    def validate_full_name(cls, v: Optional[str]) -> Optional[str]:
+        """Validate full name"""
+        if v is None:
+            return v
+        v = v.strip()
+        if not v:
+            raise ValueError('Full name cannot be empty or whitespace only')
+        if len(v) < 2:
+            raise ValueError('Full name must be at least 2 characters')
+        # Allow letters (including Vietnamese), numbers, and spaces
+        if not re.match(r'^[a-zA-ZÀ-ỹ0-9\s]+$', v):
+            raise ValueError('Full name can only contain letters, numbers and spaces')
+        return v
+    
+    @field_validator('province')
+    @classmethod
+    def validate_province(cls, v: Optional[str]) -> Optional[str]:
+        """Validate province name"""
+        if v is None:
+            return v
+        v = v.strip()
+        if not v:
+            raise ValueError('Province cannot be empty or whitespace only')
+        if len(v) < 2:
+            raise ValueError('Province name must be at least 2 characters')
+        return v
+
+
+class ChangePasswordRequest(BaseModel):
+    """Change password request schema"""
+    current_password: str = Field(
+        ...,
+        min_length=1,
+        description="Current password"
+    )
+    new_password: str = Field(
+        ...,
+        min_length=8,
+        max_length=72,
+        description="New password (8-72 characters)"
+    )
+    confirm_new_password: str = Field(
+        ...,
+        min_length=8,
+        max_length=72,
+        description="Confirm new password"
+    )
+    
+    @field_validator('current_password')
+    @classmethod
+    def validate_current_password(cls, v: str) -> str:
+        """Validate current password is not empty"""
+        if not v or not v.strip():
+            raise ValueError('Current password is required')
+        return v
+    
+    @field_validator('new_password')
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        """Validate new password strength"""
+        if len(v) < 8:
+            raise ValueError('New password must be at least 8 characters')
+        if len(v) > 72:
+            raise ValueError('New password cannot be longer than 72 characters')
+        if not re.search(r'[A-Za-z]', v):
+            raise ValueError('New password must contain at least one letter')
+        if not re.search(r'[0-9]', v):
+            raise ValueError('New password must contain at least one number')
+        return v
+    
+    @model_validator(mode='after')
+    def validate_passwords_match(self):
+        """Validate that new password and confirm match"""
+        if self.new_password != self.confirm_new_password:
+            raise ValueError('New passwords do not match')
+        return self
