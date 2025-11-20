@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { getAddressFromCoords } from '@/utils/mapUtils';
+import MapSearch from './MapSearch';
 
 // Fix icon mặc định của Leaflet trong Next.js
 const icon = L.icon({
@@ -15,13 +15,29 @@ const icon = L.icon({
   iconAnchor: [12, 41],
 });
 
-// Component con để xử lý sự kiện click
+// Component con để xử lý sự kiện click và hiển thị marker
 function LocationMarker({
   onLocationSelect,
+  externalPosition,
 }: {
   onLocationSelect: (lat: number, lng: number) => void;
+  externalPosition?: { lat: number; lng: number } | null;
 }) {
   const [position, setPosition] = useState<L.LatLng | null>(null);
+
+  // Cập nhật marker khi có vị trí từ search
+  useEffect(() => {
+    if (externalPosition) {
+      const newPosition = L.latLng(externalPosition.lat, externalPosition.lng);
+      setPosition((prev) => {
+        // Chỉ update nếu vị trí thực sự thay đổi
+        if (!prev || prev.lat !== newPosition.lat || prev.lng !== newPosition.lng) {
+          return newPosition;
+        }
+        return prev;
+      });
+    }
+  }, [externalPosition]);
 
   useMapEvents({
     click(e) {
@@ -46,6 +62,7 @@ const MapPicker = ({
 }: MapPickerProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<string>('');
+  const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number } | null>(null);
 
   const handleLocationSelect = async (lat: number, lng: number) => {
     setIsLoading(true);
@@ -54,28 +71,42 @@ const MapPicker = ({
 
     if (address) {
       setSelectedAddress(address);
+      setMarkerPosition({ lat, lng });
       onAddressFound(address, lat, lng);
     }
   };
 
+  // Hàm xử lý khi chọn từ thanh tìm kiếm
+  const handleSearchSelect = (lat: number, lng: number, address: string) => {
+    setSelectedAddress(address);
+    setMarkerPosition({ lat, lng });
+    onAddressFound(address, lat, lng);
+  };
+
   return (
     <div className="space-y-2 w-full">
-      <div className="h-[300px] w-full rounded-[18px] border-2 border-[#2e8623] overflow-hidden relative shrink-0">
+      {/* Đảm bảo div cha có chiều cao cụ thể */}
+      <div className="h-[300px] w-full rounded-[18px] border-2 border-[#2e8623] overflow-hidden relative shrink-0 z-0">
         <MapContainer
           center={[defaultLat, defaultLng]}
           zoom={13}
-          style={{ height: '300px', width: '100%', position: 'relative' }}
+          style={{ height: '100%', width: '100%' }}
           scrollWheelZoom={false}
           dragging={true}
           touchZoom={true}
           doubleClickZoom={true}
           zoomControl={true}
         >
+          {/* Tích hợp tìm kiếm vào Picker */}
+          <MapSearch onLocationSelect={handleSearchSelect} />
+
+          {/* Base Map Layer - OpenStreetMap (Stable & Free) */}
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            maxZoom={19}
           />
-          <LocationMarker onLocationSelect={handleLocationSelect} />
+          <LocationMarker onLocationSelect={handleLocationSelect} externalPosition={markerPosition} />
         </MapContainer>
 
         {/* Overlay loading */}

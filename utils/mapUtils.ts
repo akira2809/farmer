@@ -1,4 +1,4 @@
-// Goong API utilities for reverse geocoding
+// Goong API utilities for reverse geocoding and place search
 const GOONG_API_KEY = process.env.NEXT_PUBLIC_GOONG_API_KEY;
 
 interface GoongResponse {
@@ -16,6 +16,15 @@ interface GoongResponse {
   status: string;
 }
 
+export interface GoongPrediction {
+  description: string;
+  place_id: string;
+  structured_formatting: {
+    main_text: string;
+    secondary_text: string;
+  };
+}
+
 export const getAddressFromCoords = async (
   lat: number,
   lng: number
@@ -26,7 +35,7 @@ export const getAddressFromCoords = async (
   }
 
   try {
-    const url = `https://rsapi.goong.io/Geocode?latlng=${lat},${lng}&api_key=${GOONG_API_KEY}`;
+    const url = `https://rsapi.goong.io/Geocode?latlng=${lat},${lng}&api_key=${GOONG_API_KEY}&language=vi`;
     const res = await fetch(url);
     const data: GoongResponse = await res.json();
 
@@ -37,5 +46,41 @@ export const getAddressFromCoords = async (
   } catch (error) {
     console.error('Lỗi lấy địa chỉ:', error);
     return `Tọa độ: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+  }
+};
+
+export const searchPlace = async (query: string): Promise<GoongPrediction[]> => {
+  if (!GOONG_API_KEY || !query.trim()) return [];
+
+  try {
+    const url = `https://rsapi.goong.io/Place/AutoComplete?api_key=${GOONG_API_KEY}&input=${encodeURIComponent(query)}&language=vi`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.status === 'OK') {
+      return data.predictions;
+    }
+    return [];
+  } catch (error) {
+    console.error('Lỗi tìm kiếm:', error);
+    return [];
+  }
+};
+
+export const getPlaceDetail = async (placeId: string): Promise<{ lat: number; lng: number } | null> => {
+  if (!GOONG_API_KEY) return null;
+
+  try {
+    const url = `https://rsapi.goong.io/Place/Detail?place_id=${placeId}&api_key=${GOONG_API_KEY}&language=vi`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.status === 'OK' && data.result?.geometry?.location) {
+      return data.result.geometry.location;
+    }
+    return null;
+  } catch (error) {
+    console.error('Lỗi lấy chi tiết địa điểm:', error);
+    return null;
   }
 };

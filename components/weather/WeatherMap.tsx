@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import type { TFarm } from '@/models/farm';
+import MapSearch from '@/components/ui/MapSearch';
 
 interface WeatherMapProps {
     farms: TFarm[];
@@ -62,6 +62,7 @@ function MapResizer() {
 export default function WeatherMap({ farms, selectedFarmId, onFarmSelect }: WeatherMapProps) {
     const [mounted, setMounted] = useState(false);
     const apiKey = process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY;
+    const mapTilesKey = process.env.NEXT_PUBLIC_GOONG_MAP_TILES_KEY;
 
     useEffect(() => {
         // Delay setting mounted to ensure client-side rendering
@@ -110,10 +111,15 @@ export default function WeatherMap({ farms, selectedFarmId, onFarmSelect }: Weat
             >
                 <MapResizer />
                 <MapUpdater center={center} />
-                {/* Base Map Layer - Google Maps (Tiếng Việt) */}
+                
+                {/* Tích hợp tìm kiếm */}
+                <MapSearch />
+
+                {/* Base Map Layer - OpenStreetMap (Stable & Free) */}
                 <TileLayer
-                    attribution='&copy; Google Maps'
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi"
+                    maxZoom={19}
                 />
 
                 {/* Weather Layer (Temperature) */}
