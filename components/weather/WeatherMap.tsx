@@ -110,10 +110,10 @@ export default function WeatherMap({ farms, selectedFarmId, onFarmSelect }: Weat
             >
                 <MapResizer />
                 <MapUpdater center={center} />
-                {/* Base Map Layer */}
+                {/* Base Map Layer - Google Maps (Tiếng Việt) */}
                 <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; Google Maps'
+                    url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi"
                 />
 
                 {/* Weather Layer (Temperature) */}
