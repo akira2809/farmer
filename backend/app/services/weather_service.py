@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+from collections import defaultdict, Counter
 
 import httpx
 from deep_translator import GoogleTranslator
@@ -18,262 +19,162 @@ from app.models.weather import (
 
 
 class WeatherService:
-    """Service for fetching weather forecast data from WeatherAPI.com"""
+    """Service for fetching weather forecast data from OpenWeatherMap"""
 
     def __init__(self):
-        self.api_key = settings.WEATHER_API_KEY
-        self.base_url = settings.WEATHER_API_URL
-        self.timeout = 10.0  # 10-second timeout
+        self.api_key = settings.OPENWEATHERMAP_API_KEY
+        self.base_url = settings.OPENWEATHERMAP_API_URL
+        self.timeout = 10.0
         self.max_retries = 2
-        self.weather_conditions_translation = {
-            "Sunny": "Nắng",
-            "Clear": "Trời quang",
-            "Partly cloudy": "Mây rải rác",
-            "Cloudy": "Nhiều mây",
-            "Overcast": "U ám",
-            "Mist": "Sương mù",
-            "Patchy rain possible": "Có thể có mưa vài nơi",
-            "Patchy snow possible": "Có thể có tuyết vài nơi",
-            "Patchy sleet possible": "Có thể có mưa tuyết vài nơi",
-            "Patchy freezing drizzle possible": "Có thể có mưa phùn đóng băng vài nơi",
-            "Thundery outbreaks possible": "Có khả năng có dông",
-            "Blowing snow": "Bão tuyết",
-            "Blizzard": "Bão tuyết lớn",
-            "Fog": "Sương mù",
-            "Freezing fog": "Sương mù đóng băng",
-            "Patchy light drizzle": "Mưa phùn nhẹ vài nơi",
-            "Light drizzle": "Mưa phùn nhẹ",
-            "Freezing drizzle": "Mưa phùn đóng băng",
-            "Heavy freezing drizzle": "Mưa phùn đóng băng dày đặc",
-            "Patchy light rain": "Mưa nhẹ vài nơi",
-            "Light rain": "Mưa nhỏ",
-            "Moderate rain at times": "Đôi khi có mưa vừa",
-            "Moderate rain": "Mưa vừa",
-            "Heavy rain at times": "Đôi khi có mưa lớn",
-            "Heavy rain": "Mưa lớn",
-            "Light freezing rain": "Mưa đá nhẹ",
-            "Moderate or heavy freezing rain": "Mưa đá vừa hoặc nặng",
-            "Light sleet": "Mưa tuyết nhẹ",
-            "Moderate or heavy sleet": "Mưa tuyết vừa hoặc nặng",
-            "Patchy light snow": "Tuyết nhẹ vài nơi",
-            "Light snow": "Tuyết nhẹ",
-            "Patchy moderate snow": "Tuyết vừa phải vài nơi",
-            "Moderate snow": "Tuyết vừa phải",
-            "Patchy heavy snow": "Tuyết dày vài nơi",
-            "Heavy snow": "Tuyết dày",
-            "Ice pellets": "Mưa đá",
-            "Light rain shower": "Mưa rào nhẹ",
-            "Moderate or heavy rain shower": "Mưa rào vừa hoặc nặng",
-            "Torrential rain shower": "Mưa như trút nước",
-            "Light sleet showers": "Mưa tuyết nhẹ",
-            "Moderate or heavy sleet showers": "Mưa tuyết vừa hoặc nặng",
-            "Light snow showers": "Mưa tuyết nhẹ",
-            "Moderate or heavy snow showers": "Mưa tuyết vừa hoặc nặng",
-            "Light showers of ice pellets": "Mưa đá nhẹ",
-            "Moderate or heavy showers of ice pellets": "Mưa đá vừa hoặc nặng",
-            "Patchy light rain with thunder": "Mưa nhẹ vài nơi kèm sấm sét",
-            "Moderate or heavy rain with thunder": "Mưa vừa hoặc lớn kèm sấm sét",
-            "Patchy light snow with thunder": "Tuyết nhẹ vài nơi kèm sấm sét",
-            "Moderate or heavy snow with thunder": "Tuyết vừa hoặc dày kèm sấm sét",
-            "Unknown": "Không xác định"
-        }
+        self.lang = "vi"  # Request Vietnamese response directly
 
     async def get_weather_forecast(self, location: GeoJSONPoint) -> WeatherForecast:
         """
-        Get 5-day weather forecast for a specific location with retry logic.
-
-        Args:
-            location: GeoJSON Point with coordinates [longitude, latitude]
-
-        Returns:
-            WeatherForecast: Formatted weather forecast data
-
-        Raises:
-            HTTPException: If the weather API fails or times out
+        Get current weather and 5-day forecast for a specific location.
         """
         longitude, latitude = location.coordinates
-        q = f"{latitude},{longitude}"
-
-        for attempt in range(self.max_retries + 1):
+        
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
             try:
-                async with httpx.AsyncClient(timeout=self.timeout) as client:
-                    params = {
-                        "key": self.api_key,
-                        "q": q,
-                        "days": 5,
-                        "aqi": "no",
-                        "alerts": "yes"
-                    }
-                    response = await client.get(f"{self.base_url}/forecast.json", params=params)
-                    response.raise_for_status()
-
-                    raw_data = response.json()
-                    return self.format_weather_data(raw_data)
-
-            except httpx.TimeoutException:
-                if attempt == self.max_retries:
-                    raise HTTPException(
-                        status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-                        detail="Weather service unavailable - request timed out"
-                    )
-                await asyncio.sleep(2 ** attempt)
+                # Fetch current weather and forecast in parallel
+                current_task = self._fetch_current_weather(client, latitude, longitude)
+                forecast_task = self._fetch_forecast(client, latitude, longitude)
+                
+                current_data, forecast_data = await asyncio.gather(current_task, forecast_task)
+                
+                return self.format_weather_data(current_data, forecast_data)
 
             except httpx.HTTPStatusError as e:
-                if attempt == self.max_retries:
-                    raise HTTPException(
-                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                        detail=f"Weather service error: {e.response.status_code}"
-                    )
-                await asyncio.sleep(2 ** attempt)
-
+                raise HTTPException(
+                    status_code=e.response.status_code,
+                    detail=f"Weather service error: {e.response.text}"
+                )
             except Exception as e:
-                if attempt == self.max_retries:
-                    raise HTTPException(
-                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                        detail=f"Weather service unavailable: {str(e)}"
-                    )
-                await asyncio.sleep(2 ** attempt)
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail=f"Weather service unavailable: {str(e)}"
+                )
 
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Weather service unavailable"
-        )
+    async def _fetch_current_weather(self, client: httpx.AsyncClient, lat: float, lon: float) -> Dict[str, Any]:
+        params = {
+            "lat": lat,
+            "lon": lon,
+            "appid": self.api_key,
+            "units": "metric",
+            "lang": self.lang
+        }
+        response = await client.get(f"{self.base_url}/weather", params=params)
+        response.raise_for_status()
+        return response.json()
 
-    def format_weather_data(self, raw_data: Dict[str, Any]) -> WeatherForecast:
+    async def _fetch_forecast(self, client: httpx.AsyncClient, lat: float, lon: float) -> Dict[str, Any]:
+        params = {
+            "lat": lat,
+            "lon": lon,
+            "appid": self.api_key,
+            "units": "metric",
+            "lang": self.lang
+        }
+        response = await client.get(f"{self.base_url}/forecast", params=params)
+        response.raise_for_status()
+        return response.json()
+
+    def format_weather_data(self, current: Dict[str, Any], forecast: Dict[str, Any]) -> WeatherForecast:
         """
-        Transforms WeatherAPI.com response to WeatherForecast model.
-
-        Args:
-            raw_data: Raw response from WeatherAPI.com
-
-        Returns:
-            WeatherForecast: Formatted weather data
+        Transforms OpenWeatherMap response to WeatherForecast model.
         """
-        current = raw_data.get("current", {})
-        forecast = raw_data.get("forecast", {}).get("forecastday", [])
-        location = raw_data.get("location", {})
-        alerts_data = raw_data.get("alerts", {}).get("alert", [])
+        # Process Current Weather
+        current_temp = current.get("main", {}).get("temp", 0.0)
+        current_humidity = current.get("main", {}).get("humidity", 0.0)
+        # OWM puts rain in "rain" object (1h or 3h)
+        current_rain = current.get("rain", {}).get("1h", 0.0)
+        current_condition = current.get("weather", [{}])[0].get("description", "Unknown").capitalize()
+        location_name = current.get("name", "Unknown")
 
-        if not forecast:
-            raise ValueError("No forecast data available")
-
-        daily_forecasts = self._aggregate_daily_forecasts(forecast)
-        alerts = self._format_alerts(alerts_data)
+        # Process Forecast (Aggregate 3h data into days)
+        daily_forecasts = self._aggregate_daily_forecasts(forecast.get("list", []))
 
         return WeatherForecast(
-            temperature=current.get("temp_c", 0.0),
-            humidity=current.get("humidity", 0.0),
-            rainfall=current.get("precip_mm", 0.0),
-            conditions=self._translate_condition(
-                current.get("condition", {}).get("text", "Unknown")),
+            temperature=current_temp,
+            humidity=current_humidity,
+            rainfall=current_rain,
+            conditions=current_condition,
             forecast_days=daily_forecasts,
-            location=location.get("name", "Unknown"),
-            alerts=alerts
+            location=location_name,
+            alerts=[] # OWM Standard API does not provide alerts
         )
 
-    def _aggregate_daily_forecasts(self, forecast_days: List[Dict[str, Any]]) -> List[DailyForecast]:
+    def _aggregate_daily_forecasts(self, forecast_list: List[Dict[str, Any]]) -> List[DailyForecast]:
         """
-        Converts daily forecast data from WeatherAPI.com to DailyForecast models.
-
-        Args:
-            forecast_days: List of daily forecast items from the API response
-
-        Returns:
-            List[DailyForecast]: List of daily aggregated forecasts
+        Aggregates 3-hour forecast items into daily summaries.
         """
+        daily_groups = defaultdict(list)
+        
+        for item in forecast_list:
+            dt_txt = item.get("dt_txt", "")
+            date_str = dt_txt.split(" ")[0] if dt_txt else ""
+            if date_str:
+                daily_groups[date_str].append(item)
+
         daily_forecasts = []
-        for day_data in forecast_days:
-            day = day_data.get("day", {})
-            hourly_data = day_data.get("hour", [])
-            hourly_forecasts = self._format_hourly_forecasts(hourly_data)
+        
+        # Sort dates to ensure order
+        sorted_dates = sorted(daily_groups.keys())
+        
+        # Limit to 5 days
+        for date_str in sorted_dates[:5]:
+            items = daily_groups[date_str]
+            
+            # Calculate aggregates
+            temps = [i["main"]["temp"] for i in items]
+            min_temp = min([i["main"]["temp_min"] for i in items])
+            max_temp = max([i["main"]["temp_max"] for i in items])
+            avg_temp = sum(temps) / len(temps)
+            
+            humidities = [i["main"]["humidity"] for i in items]
+            avg_humidity = sum(humidities) / len(humidities)
+            
+            # Rain is often missing if no rain
+            rainfall = sum([i.get("rain", {}).get("3h", 0.0) for i in items])
+            
+            # Most frequent condition
+            conditions = [i["weather"][0]["description"] for i in items if i.get("weather")]
+            most_common_condition = Counter(conditions).most_common(1)[0][0].capitalize() if conditions else "Unknown"
+
+            # Hourly data (mapped from 3h intervals)
+            hourly_forecasts = self._format_hourly_forecasts(items)
 
             daily_forecasts.append(DailyForecast(
-                date=day_data.get("date"),
-                max_temp=day.get("maxtemp_c", 0.0),
-                min_temp=day.get("mintemp_c", 0.0),
-                avg_temp=day.get("avgtemp_c", 0.0),
-                max_humidity=day.get("avghumidity", 0.0),
-                avg_humidity=day.get("avghumidity", 0.0),
-                total_rainfall=day.get("totalprecip_mm", 0.0),
-                conditions=self._translate_condition(
-                    day.get("condition", {}).get("text", "Unknown")),
+                date=date_str,
+                max_temp=max_temp,
+                min_temp=min_temp,
+                avg_temp=avg_temp,
+                max_humidity=max(humidities) if humidities else 0,
+                avg_humidity=avg_humidity,
+                total_rainfall=rainfall,
+                conditions=most_common_condition,
                 hourly=hourly_forecasts
             ))
+            
         return daily_forecasts
 
-    def _format_hourly_forecasts(self, hourly_data: List[Dict[str, Any]]) -> List[HourlyForecast]:
+    def _format_hourly_forecasts(self, items: List[Dict[str, Any]]) -> List[HourlyForecast]:
         """
-        Converts hourly forecast data from WeatherAPI.com to HourlyForecast models.
-
-        Args:
-            hourly_data: List of hourly forecast items from the API response
-
-        Returns:
-            List[HourlyForecast]: List of hourly forecasts
+        Maps OWM 3h forecast items to HourlyForecast model.
         """
         hourly_forecasts = []
-        for hour_data in hourly_data:
+        for item in items:
+            dt_txt = item.get("dt_txt", "")
+            time_str = dt_txt.split(" ")[1][:5] if len(dt_txt.split(" ")) > 1 else ""
+            
             hourly_forecasts.append(HourlyForecast(
-                time=hour_data.get("time"),
-                temp_c=hour_data.get("temp_c"),
-                condition=self._translate_condition(
-                    hour_data.get("condition", {}).get("text", "Unknown")),
-                wind_kph=hour_data.get("wind_kph"),
-                wind_dir=hour_data.get("wind_dir"),
-                precip_mm=hour_data.get("precip_mm"),
-                humidity=hour_data.get("humidity"),
-                chance_of_rain=hour_data.get("chance_of_rain")
+                time=time_str,
+                temp_c=item["main"]["temp"],
+                condition=item["weather"][0]["description"].capitalize() if item.get("weather") else "Unknown",
+                wind_kph=item.get("wind", {}).get("speed", 0) * 3.6, # m/s to kph
+                wind_dir=str(item.get("wind", {}).get("deg", 0)),
+                precip_mm=item.get("rain", {}).get("3h", 0.0),
+                humidity=item["main"]["humidity"],
+                chance_of_rain=int(item.get("pop", 0) * 100) # Probability of precipitation
             ))
         return hourly_forecasts
-
-    def _format_alerts(self, alerts_data: List[Dict[str, Any]]) -> List[WeatherAlert]:
-        """
-        Converts alert data from WeatherAPI.com to WeatherAlert models.
-
-        Args:
-            alerts_data: List of alert items from the API response
-
-        Returns:
-            List[WeatherAlert]: List of weather alerts
-        """
-        alerts = []
-        for alert_data in alerts_data:
-            alerts.append(WeatherAlert(
-                headline=alert_data.get("headline"),
-                event=alert_data.get("event"),
-                effective=alert_data.get("effective"),
-                expires=alert_data.get("expires"),
-                description=alert_data.get("desc"),
-                instruction=alert_data.get("instruction")
-            ))
-        return alerts
-
-    def _translate_condition(self, condition_text: str) -> str:
-        """
-        Translates weather condition text to Vietnamese.
-        If the translation is not in the local dictionary, it uses Google Translate.
-
-        Args:
-            condition_text: The weather condition in English.
-
-        Returns:
-            The translated weather condition in Vietnamese.
-        """
-        return self.weather_conditions_translation.get(condition_text, self._translate_with_google(condition_text))
-
-    def _translate_with_google(self, text: str, dest_language: str = "vi") -> str:
-        """
-        Translates text using Google Translate as a fallback.
-
-        Args:
-            text: The text to translate.
-            dest_language: The destination language (default: Vietnamese).
-
-        Returns:
-            The translated text or the original text if translation fails.
-        """
-        try:
-            return GoogleTranslator(source='auto', target=dest_language).translate(text)
-        except Exception:
-            # In case of any error with the translation service, return the original text
-            return text

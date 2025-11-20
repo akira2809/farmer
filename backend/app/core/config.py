@@ -15,8 +15,8 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     # External API Configuration
-    WEATHER_API_KEY: str
-    WEATHER_API_URL: str
+    OPENWEATHERMAP_API_KEY: str
+    OPENWEATHERMAP_API_URL: str = "https://api.openweathermap.org/data/2.5"
 
     # Clova Studio API Configuration
     CLOVA_STUDIO_API_KEY: str
@@ -33,7 +33,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        case_sensitive=True
+        case_sensitive=True,
+        extra="ignore"
     )
 
 

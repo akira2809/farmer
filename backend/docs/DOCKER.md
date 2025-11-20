@@ -130,7 +130,7 @@ Required variables in `.env`:
 JWT_SECRET_KEY=generate-strong-random-key-min-32-chars
 
 # API Keys
-WEATHER_API_KEY=your-weatherapi-key
+OPENWEATHERMAP_API_KEY=your-openweathermap-key
 CLOVA_STUDIO_API_KEY=your-clova-api-key
 CLOVA_STUDIO_REQUEST_ID=your-request-id
 ```
@@ -189,8 +189,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES=15
 REFRESH_TOKEN_EXPIRE_DAYS=7
 
 # External APIs
-WEATHER_API_KEY=your-key
-WEATHER_API_URL=https://api.weatherapi.com/v1
+OPENWEATHERMAP_API_KEY=your-key
+OPENWEATHERMAP_API_URL=https://api.openweathermap.org/data/2.5
 N8N_WEBHOOK_URL=http://n8n:5678/webhook/weather
 
 # Clova Studio
@@ -363,7 +363,7 @@ services:
     environment:
       - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD}@mongodb:27017
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - WEATHER_API_KEY=${WEATHER_API_KEY}
+      - OPENWEATHERMAP_API_KEY=${OPENWEATHERMAP_API_KEY}
       - CLOVA_STUDIO_API_KEY=${CLOVA_STUDIO_API_KEY}
       - CLOVA_STUDIO_REQUEST_ID=${CLOVA_STUDIO_REQUEST_ID}
       - DEBUG=False

@@ -527,8 +527,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 REFRESH_TOKEN_EXPIRE_DAYS=30
 
 # External APIs
-WEATHER_API_KEY=your-dev-key
-WEATHER_API_URL=https://api.weatherapi.com/v1
+OPENWEATHERMAP_API_KEY=your-dev-key
+OPENWEATHERMAP_API_URL=https://api.openweathermap.org/data/2.5
 N8N_WEBHOOK_URL=http://localhost:5678/webhook/weather
 CLOVA_STUDIO_API_KEY=your-dev-clova-key
 CLOVA_STUDIO_REQUEST_ID=your-dev-request-id
@@ -552,8 +552,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES=15
 REFRESH_TOKEN_EXPIRE_DAYS=7
 
 # External APIs (production keys)
-WEATHER_API_KEY=your-production-weather-key
-WEATHER_API_URL=https://api.weatherapi.com/v1
+OPENWEATHERMAP_API_KEY=your-production-weather-key
+OPENWEATHERMAP_API_URL=https://api.openweathermap.org/data/2.5
 N8N_WEBHOOK_URL=https://n8n.yourdomain.com/webhook/weather
 CLOVA_STUDIO_API_KEY=your-production-clova-key
 CLOVA_STUDIO_REQUEST_ID=your-production-request-id

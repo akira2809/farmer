@@ -323,8 +323,7 @@ All API endpoints return responses in a standardized structure using the `APIRes
     "current": {
       "temp_c": 28.0,
       "condition": {
-        "text": "Partly cloudy",
-        "icon": "//cdn.weatherapi.com/weather/64x64/day/116.png"
+        "text": "Partly cloudy"
       },
       "wind_kph": 15.0,
       "humidity": 70,

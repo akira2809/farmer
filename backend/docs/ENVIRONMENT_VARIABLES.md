@@ -150,38 +150,38 @@ REFRESH_TOKEN_EXPIRE_DAYS=7
 
 ## External APIs
 
-### `WEATHER_API_KEY`
+### `OPENWEATHERMAP_API_KEY`
 
 **Description**: API key for weather service
 
 **Required**: ✅ Yes
 
-**Provider**: [WeatherAPI.com](https://www.weatherapi.com/)
+**Provider**: [OpenWeatherMap](https://openweathermap.org/)
 
 **How to get**:
-1. Sign up at https://www.weatherapi.com/signup.aspx
+1. Sign up at https://home.openweathermap.org/users/sign_up
 2. Verify your email
-3. Go to Dashboard → API Key
+3. Go to API Keys tab
 4. Copy your API key
 
-**Free tier**: 1 million calls/month
+**Free tier**: 60 calls/minute, 1,000,000 calls/month
 
 **Example**:
 ```bash
-WEATHER_API_KEY=abc123def456ghi789jkl012mno345pq
+OPENWEATHERMAP_API_KEY=abc123def456ghi789jkl012mno345pq
 ```
 
-### `WEATHER_API_URL`
+### `OPENWEATHERMAP_API_URL`
 
-**Description**: Base URL for weather API
+**Description**: Base URL for OpenWeatherMap API
 
 **Required**: ✅ Yes
 
-**Default**: `https://api.weatherapi.com/v1`
+**Default**: `https://api.openweathermap.org/data/2.5`
 
 **Example**:
 ```bash
-WEATHER_API_URL=https://api.weatherapi.com/v1
+OPENWEATHERMAP_API_URL=https://api.openweathermap.org/data/2.5
 ```
 
 ### `N8N_WEBHOOK_URL`

@@ -1,17 +1,5 @@
 # NÔNG DÂN AI - Smart Farming Support System
 
-> Hệ thống hỗ trợ nông dân thông minh với AI - AI-powered smart farming assistance platform
-
-## 🌟 Features
-
-- 🔐 **Authentication System** - JWT-based authentication with access & refresh tokens using Argon2
-- 🌾 **Farm Management** - Manage farms with geospatial data (GeoJSON), crop types, and growth stages
-- 🌤️ **Weather Forecast** - Real-time weather data integration for farming decisions
-- 🔬 **AI Disease Detection** - Plant disease diagnosis from images using deep learning (38 plant diseases)
-- 💬 **AI Chatbot** - Farming consultation powered by Clova Studio AI
-- 🔔 **Smart Notifications** - Push notifications via n8n workflow automation
-
-## 📋 Tech Stack
 
 ### Backend
 - **FastAPI** - Modern, fast web framework
@@ -49,7 +37,7 @@
    ```bash
    # Required: Set your API keys
    JWT_SECRET_KEY=your-strong-secret-key-here
-   WEATHER_API_KEY=your-weather-api-key
+   OPENWEATHERMAP_API_KEY=your-openweathermap-api-key
    CLOVA_STUDIO_API_KEY=your-clova-api-key
    CLOVA_STUDIO_REQUEST_ID=your-request-id
    ```
@@ -239,8 +227,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES=15
 REFRESH_TOKEN_EXPIRE_DAYS=7
 
 # Weather API (REQUIRED)
-WEATHER_API_KEY=your-weatherapi-key
-WEATHER_API_URL=https://api.weatherapi.com/v1
+OPENWEATHERMAP_API_KEY=your-openweathermap-api-key
+OPENWEATHERMAP_API_URL=https://api.openweathermap.org/data/2.5
 
 # n8n Webhook
 N8N_WEBHOOK_URL=http://localhost:5678/webhook/weather
@@ -258,8 +246,8 @@ CORS_ORIGINS=["*"]
 
 ### Getting API Keys
 
-#### Weather API
-1. Sign up at https://www.weatherapi.com/
+#### OpenWeatherMap
+1. Sign up at https://openweathermap.org/
 2. Get free API key from dashboard
 
 #### Clova Studio
@@ -440,5 +428,5 @@ This project is proprietary and confidential.
 
 - PlantVillage Dataset for disease detection training
 - Naver Clova Studio for AI chatbot
-- WeatherAPI for weather data
+- OpenWeatherMap for weather data
 - FastAPI community

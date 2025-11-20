@@ -40,8 +40,9 @@ services:
       - REFRESH_TOKEN_EXPIRE_DAYS=7
       
       # External API Configuration
-      - WEATHER_API_KEY=${WEATHER_API_KEY}
-      - WEATHER_API_URL=${WEATHER_API_URL:-https://api.weatherapi.com/v1}
+      # External API Configuration
+      - OPENWEATHERMAP_API_KEY=${OPENWEATHERMAP_API_KEY}
+      - OPENWEATHERMAP_API_URL=${OPENWEATHERMAP_API_URL:-https://api.openweathermap.org/data/2.5}
       
       # Clova Studio API Configuration
       - CLOVA_STUDIO_API_KEY=${CLOVA_STUDIO_API_KEY}

@@ -148,7 +148,7 @@ Send weather data to n8n webhook.
 await notification_service.trigger_weather_webhook(
     user_id: str,              # Required: User ObjectId
     farm_id: str,              # Required: Farm ObjectId
-    weather_data: dict         # Required: Weather data from WeatherAPI
+    weather_data: dict         # Required: Weather data from OpenWeatherMap
 )
 ```
 

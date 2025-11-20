@@ -7,6 +7,7 @@ from app.models.user import UserInDB
 from app.models.api_response import APIResponse, success_response, error_response
 from app.services.weather_service import WeatherService
 from app.services.farm_service import FarmService
+from app.services.clova_service import ClovaStudioService
 from app.core.dependencies import get_current_user
 from app.core.database import get_database
 
@@ -22,6 +23,11 @@ def get_weather_service() -> WeatherService:
 def get_farm_service() -> FarmService:
     """Dependency to get FarmService instance"""
     return FarmService(get_database())
+
+
+def get_clova_service() -> ClovaStudioService:
+    """Dependency to get ClovaStudioService instance"""
+    return ClovaStudioService()
 
 
 @router.post(
@@ -162,5 +168,59 @@ async def get_farm_weather(
     except Exception as e:
         return error_response(
             message=f"Failed to retrieve weather forecast: {str(e)}",
+            code="INTERNAL_ERROR"
+        )
+
+
+@router.get(
+    "/advice/farm/{farm_id}",
+    response_model=APIResponse[Dict[str, Any]]
+)
+async def get_weather_advice(
+    farm_id: str,
+    current_user: UserInDB = Depends(get_current_user),
+    weather_service: WeatherService = Depends(get_weather_service),
+    farm_service: FarmService = Depends(get_farm_service),
+    clova_service: ClovaStudioService = Depends(get_clova_service)
+) -> Dict[str, Any]:
+    """
+    Get AI-generated weather advice for a specific farm.
+    """
+    try:
+        # Verify farm ownership
+        is_owner = await farm_service.verify_farm_ownership(str(current_user.id), farm_id)
+        
+        if not is_owner:
+            return error_response(
+                message="You do not have permission to access this farm",
+                code="FORBIDDEN"
+            )
+        
+        # Get farm location
+        farm = await farm_service.get_farm_by_id(farm_id)
+        
+        # Fetch weather forecast
+        weather = await weather_service.get_weather_forecast(farm.location)
+        
+        # Get advice from Clova
+        advice_result = await clova_service.get_weather_advice(
+            weather.model_dump(),
+            farm.name
+        )
+        
+        if advice_result["success"]:
+            return success_response(
+                data=advice_result,
+                message="Weather advice retrieved successfully"
+            )
+        else:
+            return error_response(
+                message=advice_result.get("error", "Failed to generate advice"),
+                code="ADVICE_GENERATION_ERROR"
+            )
+
+    except Exception as e:
+        return error_response(
+            message=f"Failed to retrieve weather advice: {str(e)}",
             code="INTERNAL_ERROR"
         )

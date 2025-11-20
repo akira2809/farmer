@@ -237,3 +237,115 @@ Trả lời bằng tiếng Việt, ngắn gọn và dễ hiểu cho nông dân."
                     "success": False,
                     "error": str(e)
                 }
+
+    async def get_weather_advice(
+        self,
+        weather_data: Dict[str, Any],
+        location_name: str
+    ) -> Dict[str, Any]:
+        """
+        Get weather advice from Clova Studio based on weather forecast
+        
+        Args:
+            weather_data: Weather forecast data
+            location_name: Name of the location
+            
+        Returns:
+            Dictionary containing advice
+        """
+        import os
+        import json
+        from datetime import datetime
+        import hashlib
+
+        try:
+            # 1. Check Cache
+            today = datetime.now().strftime("%Y-%m-%d")
+            # Create a simple hash of location to avoid filesystem issues with special chars
+            loc_hash = hashlib.md5(location_name.encode()).hexdigest()
+            cache_dir = "cache/weather_advice"
+            cache_file = f"{cache_dir}/{today}_{loc_hash}.json"
+            
+            # Ensure cache directory exists
+            os.makedirs(cache_dir, exist_ok=True)
+            
+            if os.path.exists(cache_file):
+                try:
+                    with open(cache_file, "r", encoding="utf-8") as f:
+                        cached_data = json.load(f)
+                        return cached_data
+                except Exception as e:
+                    print(f"Cache read error: {e}")
+                    # Continue to generate if cache read fails
+
+            # 2. Build Prompt
+            prompt = self._build_weather_prompt(weather_data, location_name)
+            
+            # 3. Call Clova Studio
+            response_data = await self._make_request(prompt)
+            
+            result = {
+                "success": True,
+                "advice": response_data.get("content", ""),
+                "location": location_name,
+                "date": today,
+                "cached": False
+            }
+
+            # 4. Save to Cache
+            try:
+                # Mark as cached for future reads
+                cache_content = result.copy()
+                cache_content["cached"] = True
+                with open(cache_file, "w", encoding="utf-8") as f:
+                    json.dump(cache_content, f, ensure_ascii=False, indent=2)
+            except Exception as e:
+                print(f"Cache write error: {e}")
+
+            return result
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "advice": "Hiện tại không thể lấy lời khuyên thời tiết. Hãy chú ý theo dõi dự báo thời tiết thường xuyên."
+            }
+
+    def _build_weather_prompt(
+        self,
+        weather_data: Dict[str, Any],
+        location_name: str
+    ) -> str:
+        """
+        Build a prompt for weather advice
+        """
+        # Extract key info from weather data (assuming WeatherForecast model structure)
+        current_cond = weather_data.get("conditions", "")
+        temp = weather_data.get("temperature", 0)
+        humidity = weather_data.get("humidity", 0)
+        rain = weather_data.get("rainfall", 0)
+        
+        forecast_summary = ""
+        if "forecast_days" in weather_data:
+            for day in weather_data["forecast_days"][:3]: # Look at next 3 days
+                date = day.get("date", "")
+                cond = day.get("conditions", "")
+                min_t = day.get("min_temp", 0)
+                max_t = day.get("max_temp", 0)
+                rain_day = day.get("total_rainfall", 0)
+                forecast_summary += f"- {date}: {cond}, {min_t}-{max_t}°C, Mưa: {rain_day}mm\n"
+
+        prompt = f"""Dữ liệu thời tiết tại {location_name}:
+Hiện tại: {current_cond}, Nhiệt độ: {temp}°C, Độ ẩm: {humidity}%, Mưa: {rain}mm.
+
+Dự báo 3 ngày tới:
+{forecast_summary}
+
+Dựa trên dữ liệu trên, hãy đóng vai một chuyên gia nông nghiệp và đưa ra lời khuyên ngắn gọn (khoảng 2-3 câu) cho nông dân. 
+Tập trung vào các hành động cần thiết ngay (như tưới nước, che chắn, phun thuốc, bón phân...) để bảo vệ cây trồng.
+Văn phong thân thiện, như người nhà nói chuyện với nhau.
+Bắt đầu bằng câu chào hoặc nhận định chung về thời tiết sắp tới.
+Ví dụ: "Sắp tới sẽ có mưa to trong vòng 2-3 ngày, bác nhớ chú ý khơi thông rãnh thoát nước để tránh ngập úng cho cây nhé..."
+"""
+        return prompt
+
