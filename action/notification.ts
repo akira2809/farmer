@@ -28,7 +28,7 @@ export async function getNotificationsAction(
       };
     }
 
-    if (response.success && response.data) {
+    if (response.data) {
       return {
         success: true,
         data: response.data
@@ -65,7 +65,7 @@ export async function markNotificationAsReadAction(
       };
     }
 
-    if (response.success && response.data) {
+    if (response.data) {
       return {
         success: true,
         data: response.data

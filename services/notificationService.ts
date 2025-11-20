@@ -32,5 +32,5 @@ export const markNotificationAsRead = async (
   notificationId: string
 ): Promise<TResponseData<Notification> | undefined> => {
   const url = apiConfig.Notification.updateNotification.replace(':notificationId', notificationId);
-  return useApiPut<Notification>(url);
+  return useApiPut(url, { is_read: true }) as Promise<TResponseData<Notification> | undefined>;
 };

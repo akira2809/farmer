@@ -3,6 +3,15 @@
 import { DiseaseDetectionFormData, DiseaseDetectionResponse } from '@/models/ai';
 import aiApi from '@/services/ai';
 
+interface ApiResponse<T = unknown> {
+  success?: boolean;
+  message?: string;
+  data?: T;
+  error?: {
+    errors?: unknown;
+  };
+}
+
 export async function detectDiseaseAction(payload: DiseaseDetectionFormData): Promise<DiseaseDetectionResponse | null> {
   try {
     console.log('=== AI DETECTION ACTION START ===');
@@ -12,7 +21,7 @@ export async function detectDiseaseAction(payload: DiseaseDetectionFormData): Pr
     // Log FormData if it's FormData
     if (payload instanceof FormData) {
       console.log('FormData entries:');
-      for (let [key, value] of payload.entries()) {
+      for (const [key, value] of payload.entries()) {
         if (value instanceof File) {
           console.log(`${key}: File - ${value.name}, ${value.size} bytes, ${value.type}`);
         } else {
@@ -23,7 +32,7 @@ export async function detectDiseaseAction(payload: DiseaseDetectionFormData): Pr
       console.log('Payload is not FormData:', payload);
     }
 
-    const response = await aiApi.detectDisease(payload);
+    const response = await aiApi.detectDisease(payload) as ApiResponse<DiseaseDetectionResponse> | undefined;
     console.log('=== API RESPONSE ===');
     console.log('API Response:', response);
     
@@ -32,7 +41,7 @@ export async function detectDiseaseAction(payload: DiseaseDetectionFormData): Pr
     
     if (apiResponse?.success) {
       console.log('Success! Returning data:', apiResponse.data);
-      return apiResponse.data;
+      return apiResponse.data || null;
     } else {
       console.error('API Error:', apiResponse?.message || 'Unknown error');
       console.error('Full error response:', apiResponse);
