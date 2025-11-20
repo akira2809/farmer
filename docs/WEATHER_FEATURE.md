@@ -9,7 +9,7 @@ Tính năng Weather cho phép người dùng xem dự báo thời tiết 5 ngày
 - `farmer/models/weather.ts` - TypeScript interfaces cho weather data
 
 ### Services
-- `farmer/services/weatherService.ts` - Service layer gọi Weather API
+- `farmer/services/weatherService.ts` - Service layer gọi Backend API (Backend gọi OpenWeatherMap)
 
 ### Actions
 - `farmer/action/weatherAction.ts` - Server Actions xử lý authentication

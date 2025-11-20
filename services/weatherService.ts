@@ -43,3 +43,19 @@ export async function getWeatherByFarm(farmId: string): Promise<WeatherForecast>
 
   return response.data;
 }
+
+/**
+ * Get weather advice for a specific farm
+ */
+export async function getWeatherAdvice(farmId: string): Promise<any> {
+  const url = API_ROUTE.Weather.getWeatherAdvice.replace(":farmId", farmId);
+
+  // Cast response to include success property which exists in backend response
+  const response = await useApiGet<any>(url) as (TResponseData<any> & { success: boolean }) | undefined;
+
+  if (!response || !response.success) {
+    throw new Error(response?.message || "Failed to get weather advice");
+  }
+
+  return response.data;
+}

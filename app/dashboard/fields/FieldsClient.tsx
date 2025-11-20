@@ -9,6 +9,7 @@ import { TFarm } from "@/models/farm";
 import AddFieldModal from "./components/AddFieldModal";
 import EditFieldModal from "./components/EditFieldModal";
 import { deleteFarmAction } from "@/action/farm";
+import FarmImage from "@/components/FarmImage";
 
 const img1 = "https://www.figma.com/api/mcp/asset/0f961402-38df-4a20-a6fe-dc4ea536b4a6";
 const img2 = "https://www.figma.com/api/mcp/asset/45a84cac-4791-4ebf-9f34-1f34823bfc73";
@@ -71,7 +72,12 @@ export default function FieldsClient({ fields }: { fields: TFarm[] }) {
                   className="bg-[#fffcf6] border-2 border-[#2e8623] border-solid relative rounded-[14.09px] shrink-0 w-full sm:w-[calc(50%-12.5px)] lg:w-[332.691px] hover:shadow-lg transition-shadow group"
                 >
                   <div className="box-border flex flex-col gap-[20px] md:gap-[23.484px] items-center overflow-clip pb-[28px] md:pb-[35.226px] pt-[18px] md:pt-[23.484px] px-[18px] md:px-[23.484px] relative rounded-[inherit]">
-                    <div className="bg-[#d9d9d9] h-[140px] md:h-[165.954px] shrink-0 w-full rounded-[8px]" />
+                    <div className="relative h-[140px] md:h-[165.954px] shrink-0 w-full rounded-[8px] overflow-hidden">
+                      <FarmImage 
+                        alt={field.name} 
+                        src={(field as any).image}
+                      />
+                    </div>
                     <div className="flex flex-col gap-[5px] md:gap-[6.262px] items-start leading-[normal] relative shrink-0 text-black w-full">
                       <div className="flex justify-between items-start w-full">
                         <p className="font-['Be_Vietnam_Pro'] font-semibold relative shrink-0 text-[20px] md:text-[25.05px]">

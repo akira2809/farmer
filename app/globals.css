@@ -41,7 +41,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Leaflet Map Container Fix - Prevent expansion on click */
 .leaflet-container {
   width: 100% !important;
-  height: 300px !important;
+  height: 100% !important;
   max-width: 100% !important;
   position: relative !important;
 }

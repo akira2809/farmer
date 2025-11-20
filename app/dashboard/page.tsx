@@ -3,20 +3,34 @@ import Image from "next/image";
 import farmApi from "@/services/farm";
 import { TFarm } from "@/models/farm";
 
+import { getWeatherAdvice } from "@/services/weatherService";
+import FarmImage from "@/components/FarmImage";
+
 async function getData(): Promise<TFarm[]> {
   try {
     const productRes = await farmApi.getFarms();
     // Extract farm data from response structure
     const response = productRes as any;
-    const farms = response?.data?.data || 
-                  response?.data?.farms || 
-                  response?.data || 
-                  [];
-    
+    const farms = response?.data?.data ||
+      response?.data?.farms ||
+      response?.data ||
+      [];
+
     return Array.isArray(farms) ? farms : [];
   } catch (error) {
     console.error('Failed to fetch farm data:', error);
     return [];
+  }
+}
+
+async function getAdvice(farmId: string): Promise<string | null> {
+  if (!farmId) return null;
+  try {
+    const result = await getWeatherAdvice(farmId);
+    return result?.advice || null;
+  } catch (error) {
+    console.error('Failed to fetch weather advice:', error);
+    return null;
   }
 }
 
@@ -28,6 +42,9 @@ const img1 = "https://www.figma.com/api/mcp/asset/e67b2a82-c3e1-49ef-9428-9c423c
 
 export default async function Dashboard() {
   const data = await getData();
+  const firstFarm = data.length > 0 ? data[0] : null;
+  const advice = firstFarm ? await getAdvice(firstFarm.id) : null;
+
   return (
     <div className="bg-[#fffcf6] flex flex-col md:flex-row items-start relative min-h-screen w-full overflow-hidden">
       <Sidebar activePage="home" />
@@ -41,8 +58,8 @@ export default async function Dashboard() {
               <p>Bạn Cần Gì? Hãy Nói Cho Tôi Biết</p>
             </div>
             <div className="bg-[#ebf5ed] border border-[#2e8623] border-solid box-border flex gap-[10px] h-[50px] md:h-[60px] items-center justify-end px-[11px] py-[8px] relative rounded-[18px] shrink-0 w-full max-w-[700px]">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 className="flex-1 bg-transparent outline-none px-4 text-[15px] md:text-[16px]"
                 placeholder="Tìm kiếm..."
               />
@@ -61,7 +78,7 @@ export default async function Dashboard() {
               </div>
             </div>
             <p className="flex-[1_0_0] font-['Be_Vietnam_Pro'] leading-[1.5] relative text-[14px] md:text-[16px] text-black">
-              Sắp tới sẽ có mưa to trong vòng 2-3 ngày, bạn hãy chú ý bảo vệ các cây,...
+              {advice || "Sắp tới sẽ có mưa to trong vòng 2-3 ngày, bạn hãy chú ý bảo vệ các cây,..."}
             </p>
           </div>
         </div>
@@ -74,7 +91,12 @@ export default async function Dashboard() {
             {data?.length > 0 ? data.map((farm: TFarm) => (
               <div key={farm.id || farm.name} className="bg-[#fffcf6] border-2 border-[#2e8623] border-solid relative rounded-[14.09px] shrink-0 w-[220px] md:w-[250px]">
                 <div className="box-border flex flex-col gap-[12px] md:gap-[15px] items-center overflow-clip pb-[20px] md:pb-[24px] pt-[12px] md:pt-[15px] px-[12px] md:px-[15px] relative rounded-[inherit]">
-                  <div className="bg-[#d9d9d9] h-[110px] md:h-[130px] shrink-0 w-full rounded-[8px]" />
+                  <div className="relative h-[110px] md:h-[130px] shrink-0 w-full rounded-[8px] overflow-hidden">
+                    <FarmImage
+                      alt={farm.name}
+                      src={(farm as any).image}
+                    />
+                  </div>
                   <div className="flex flex-col gap-[4px] md:gap-[5px] items-start leading-[normal] relative shrink-0 text-black w-full">
                     <p className="font-['Be_Vietnam_Pro'] font-semibold relative shrink-0 text-[18px] md:text-[20px] w-full">
                       {farm.name || 'N/A'}
@@ -127,7 +149,7 @@ export default async function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

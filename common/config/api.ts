@@ -37,6 +37,8 @@ export default {
         getWeather: `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/weather/forecast`,
         // GET: Get weather data for a specific farm
         getWeatherByFarm: `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/weather/farm/:farmId`,
+        // GET: Get weather advice for a specific farm
+        getWeatherAdvice: `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/weather/advice/farm/:farmId`,
     },
     AI: { //AI assistant
         // POST: Detect plant disease from image

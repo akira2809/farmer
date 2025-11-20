@@ -59,11 +59,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi">
+    <html lang="vi" suppressHydrationWarning>
       <body className={`${playfair.variable} ${beVietnam.variable} antialiased`}>
-        <Toaster 
-          position="top-right" 
-          richColors 
+        <Toaster
+          position="top-right"
+          richColors
           closeButton
           duration={3000}
         />
