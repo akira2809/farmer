@@ -27,6 +27,7 @@ async function handleAddField(fieldData: TCreateFarm): Promise<TFarm | null> {
 interface AddFieldModalProps {
   showModal: boolean;
   onClose: () => void;
+  farms: TFarm[];
 }
 
 export default function AddFieldModal({ showModal, onClose }: AddFieldModalProps) {
