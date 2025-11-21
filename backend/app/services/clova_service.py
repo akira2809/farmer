@@ -83,7 +83,7 @@ Hãy cung cấp thông tin chi tiết về bệnh này bao gồm:
 4. Phương pháp điều trị hiệu quả
 5. Lưu ý quan trọng khi xử lý
 
-Trả lời bằng tiếng Việt, ngắn gọn và dễ hiểu cho nông dân."""
+Trả lời bằng tiếng Việt, ngắn gọn và dễ hiểu cho nông dân. Nếu disease_name là Unknown thì hãy thông báo cho người dùng là hình ảnh bạn cung cấp không hợp lệ hoặc không rõ ràng để nhận diện bệnh."""
         
         if additional_context:
             base_prompt += f"\n\nThông tin thêm từ nông dân: {additional_context}"

@@ -48,7 +48,8 @@ class DiseaseDetectionService:
         34: "Tomato - Target Spot",
         35: "Tomato - Tomato Yellow Leaf Curl Virus",
         36: "Tomato - Tomato mosaic virus",
-        37: "Tomato - healthy"
+        37: "Tomato - healthy",
+        38: "Unknown"
     }
     
     def __init__(self):
