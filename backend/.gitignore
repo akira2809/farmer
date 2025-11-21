@@ -47,3 +47,11 @@ htmlcov/
 credentials.json
 *.pem
 *.key
+
+
+tests/
+run_tests.ps1
+run_tests.py
+run_tests.sh
+
+pytest.ini

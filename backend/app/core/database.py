@@ -31,6 +31,9 @@ async def connect_to_mongo():
     await db.db.refresh_tokens.create_index("expires_at", expireAfterSeconds=0)
     await db.db.refresh_tokens.create_index("user_id")
     
+    # Create index for chat_history collection
+    await db.db.chat_history.create_index("user_id")
+    
     print(f"Connected to MongoDB: {settings.MONGODB_DB_NAME}")
 
 

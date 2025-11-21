@@ -202,10 +202,11 @@ async def get_weather_advice(
         # Fetch weather forecast
         weather = await weather_service.get_weather_forecast(farm.location)
         
-        # Get advice from Clova
+        # Get advice from Clova with user's request_id
         advice_result = await clova_service.get_weather_advice(
             weather.model_dump(),
-            farm.name
+            farm.name,
+            current_user.clova_request_id
         )
         
         if advice_result["success"]:

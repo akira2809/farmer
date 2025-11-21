@@ -41,18 +41,28 @@ class DiseaseAnalysisResponse(BaseModel):
     error: Optional[str] = Field(None, description="Error message if failed")
 
 
-class ChatMessage(BaseModel):
-    """Chat message model"""
+class ChatMessageRequest(BaseModel):
+    """Chat message model for API requests"""
     role: str = Field(..., description="Message role: 'user' or 'assistant'")
-    content: str = Field(..., description="Message content")
+    content: str = Field(
+        ..., 
+        description="Message content",
+        max_length=5000  # Limit message length to prevent DoS
+    )
 
 
 class ChatRequest(BaseModel):
     """Request for general chat with AI"""
-    message: str = Field(..., description="User's message", min_length=1)
-    conversation_history: Optional[List[ChatMessage]] = Field(
+    message: str = Field(
+        ..., 
+        description="User's message", 
+        min_length=1,
+        max_length=5000  # Limit to 5000 characters to prevent DoS and high API costs
+    )
+    conversation_history: Optional[List[ChatMessageRequest]] = Field(
         default=None,
-        description="Previous conversation history"
+        description="Previous conversation history",
+        max_length=50  # Limit to 50 messages to prevent token overflow
     )
 
 

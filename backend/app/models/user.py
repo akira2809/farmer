@@ -3,6 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, Field, field_validator, model_validator
 from bson import ObjectId
 import re
+import uuid
 
 from app.models.base import PyObjectId
 
@@ -14,6 +15,10 @@ class UserInDB(BaseModel):
     phone: str
     password_hash: str
     province: str
+    clova_request_id: str = Field(
+        default_factory=lambda: str(uuid.uuid4()).replace("-", ""),
+        description="Unique request ID for Clova Studio API per user"
+    )
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
     class Config:

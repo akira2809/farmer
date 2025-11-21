@@ -9,7 +9,6 @@ class ClovaStudioService:
     def __init__(self):
         """Initialize Clova Studio service"""
         self.api_key = settings.CLOVA_STUDIO_API_KEY
-        self.request_id = settings.CLOVA_STUDIO_REQUEST_ID
         self.host = "https://clovastudio.stream.ntruss.com"
         self.base_url = f"{self.host}/v1/chat-completions/HCX-003"
         self.timeout = 60.0
@@ -18,6 +17,7 @@ class ClovaStudioService:
         self,
         disease_name: str,
         confidence: float,
+        request_id: str,
         additional_context: Optional[str] = None
     ) -> Dict[str, Any]:
         """
@@ -26,6 +26,7 @@ class ClovaStudioService:
         Args:
             disease_name: Name of the detected disease
             confidence: Confidence score of the detection (0-1)
+            request_id: User-specific request ID for Clova Studio
             additional_context: Optional additional context from user
             
         Returns:
@@ -36,7 +37,7 @@ class ClovaStudioService:
             prompt = self._build_prompt(disease_name, confidence, additional_context)
             
             # Make API request
-            response_data = await self._make_request(prompt)
+            response_data = await self._make_request(prompt, request_id)
             
             return {
                 "success": True,
@@ -90,25 +91,28 @@ Trả lời bằng tiếng Việt, ngắn gọn và dễ hiểu cho nông dân. 
         
         return base_prompt
     
-    async def _make_request(self, prompt: str) -> Dict[str, Any]:
+    async def _make_request(self, prompt: str, request_id: str, messages: Optional[list] = None) -> Dict[str, Any]:
         """
         Make HTTP request to Clova Studio API
         
         Args:
             prompt: The prompt to send to Clova Studio
+            request_id: User-specific request ID for Clova Studio
+            messages: Optional pre-built messages list (for chat with history)
             
         Returns:
             Response data from Clova Studio
         """
         headers = {
             "Authorization": f"Bearer {self.api_key}",
-            "X-NCP-CLOVASTUDIO-REQUEST-ID": self.request_id,
+            "X-NCP-CLOVASTUDIO-REQUEST-ID": request_id,
             "Content-Type": "application/json; charset=utf-8",
             "Accept": "application/json"
         }
         
-        payload = {
-            "messages": [
+        # Use provided messages or build default
+        if messages is None:
+            messages = [
                 {
                     "role": "system",
                     "content": "Bạn là chuyên gia nông nghiệp chuyên về bệnh cây trồng. Hãy cung cấp lời khuyên chính xác, hữu ích bằng tiếng Việt."
@@ -117,7 +121,10 @@ Trả lời bằng tiếng Việt, ngắn gọn và dễ hiểu cho nông dân. 
                     "role": "user",
                     "content": prompt
                 }
-            ],
+            ]
+        
+        payload = {
+            "messages": messages,
             "topP": 0.8,
             "topK": 0,
             "maxTokens": 2000,
@@ -160,6 +167,7 @@ Trả lời bằng tiếng Việt, ngắn gọn và dễ hiểu cho nông dân. 
     async def chat(
         self,
         message: str,
+        request_id: str,
         conversation_history: Optional[list] = None
     ) -> Dict[str, Any]:
         """
@@ -167,18 +175,12 @@ Trả lời bằng tiếng Việt, ngắn gọn và dễ hiểu cho nông dân. 
         
         Args:
             message: User's message
+            request_id: User-specific request ID for Clova Studio
             conversation_history: Optional conversation history
             
         Returns:
             AI response
         """
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "X-NCP-CLOVASTUDIO-REQUEST-ID": self.request_id,
-            "Content-Type": "application/json; charset=utf-8",
-            "Accept": "application/json"
-        }
-        
         messages = [
             {
                 "role": "system",
@@ -196,52 +198,25 @@ Trả lời bằng tiếng Việt, ngắn gọn và dễ hiểu cho nông dân. 
             "content": message
         })
         
-        payload = {
-            "messages": messages,
-            "topP": 0.8,
-            "topK": 0,
-            "maxTokens": 2000,
-            "temperature": 0.7,
-            "repeatPenalty": 1.1,
-            "stopBefore": [],
-            "includeAiFilters": False
-        }
-        
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            try:
-                response = await client.post(
-                    self.base_url,
-                    headers=headers,
-                    json=payload
-                )
-                response.raise_for_status()
-                
-                result = response.json()
-                
-                if "result" in result and "message" in result["result"]:
-                    content = result["result"]["message"].get("content", "")
-                    return {
-                        "success": True,
-                        "content": content,
-                        "full_response": result
-                    }
-                else:
-                    return {
-                        "success": False,
-                        "error": "Invalid response format",
-                        "full_response": result
-                    }
-                    
-            except Exception as e:
-                return {
-                    "success": False,
-                    "error": str(e)
-                }
+        # Use _make_request with messages
+        try:
+            response_data = await self._make_request("", request_id, messages)
+            return {
+                "success": True,
+                "content": response_data.get("content", ""),
+                "full_response": response_data
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
 
     async def get_weather_advice(
         self,
         weather_data: Dict[str, Any],
-        location_name: str
+        location_name: str,
+        request_id: str
     ) -> Dict[str, Any]:
         """
         Get weather advice from Clova Studio based on weather forecast
@@ -249,6 +224,7 @@ Trả lời bằng tiếng Việt, ngắn gọn và dễ hiểu cho nông dân. 
         Args:
             weather_data: Weather forecast data
             location_name: Name of the location
+            request_id: User-specific request ID for Clova Studio
             
         Returns:
             Dictionary containing advice
@@ -282,7 +258,7 @@ Trả lời bằng tiếng Việt, ngắn gọn và dễ hiểu cho nông dân. 
             prompt = self._build_weather_prompt(weather_data, location_name)
             
             # 3. Call Clova Studio
-            response_data = await self._make_request(prompt)
+            response_data = await self._make_request(prompt, request_id)
             
             result = {
                 "success": True,

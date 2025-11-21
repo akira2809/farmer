@@ -13,7 +13,9 @@ from app.models.user import UserInDB
 from app.models.api_response import APIResponse, success_response, error_response
 from app.services.disease_detection_service import DiseaseDetectionService
 from app.services.clova_service import ClovaStudioService
+from app.services.chat_history_service import ChatHistoryService
 from app.core.dependencies import get_current_user
+from app.middleware.rate_limit import apply_rate_limit
 
 
 router = APIRouter(prefix="/api/ai", tags=["AI Assistant"])
@@ -21,6 +23,7 @@ router = APIRouter(prefix="/api/ai", tags=["AI Assistant"])
 # Initialize services
 disease_service = DiseaseDetectionService()
 clova_service = ClovaStudioService()
+chat_history_service = ChatHistoryService()
 
 
 @router.post(
@@ -44,8 +47,12 @@ async def detect_disease(
     
     - **image**: Plant image file (JPG, PNG)
     - **additional_context**: Optional additional questions or context
+    
+    Rate limit: 10 requests per minute
     """
     try:
+        # Apply rate limiting
+        await apply_rate_limit(str(current_user.id), "detect_disease")
         # Validate file type
         if not image.content_type or not image.content_type.startswith("image/"):
             return error_response(
@@ -80,6 +87,7 @@ async def detect_disease(
             clova_response = await clova_service.get_disease_advice(
                 disease_name=detection_result["disease_name"],
                 confidence=detection_result["confidence"],
+                request_id=current_user.clova_request_id,
                 additional_context=additional_context
             )
             
@@ -129,28 +137,51 @@ async def chat_with_ai(
 ) -> Dict[str, Any]:
     """
     General chat with AI assistant about agriculture and plant diseases.
+    User's chat history is automatically loaded and saved.
     
     - **message**: User's question or message
-    - **conversation_history**: Optional previous conversation for context
+    - **conversation_history**: Optional previous conversation for context (if not provided, uses saved history)
+    
+    Rate limit: 30 requests per minute
     """
     try:
-        # Convert conversation history to proper format
-        history = None
+        # Apply rate limiting
+        await apply_rate_limit(str(current_user.id), "chat")
+        
+        user_id = str(current_user.id)
+        
+        # Load conversation history from database if not provided
         if chat_request.conversation_history:
+            # Use provided history with max limit validation
+            # Limit to last 30 messages to prevent token overflow
+            conversation = chat_request.conversation_history[-30:] if len(chat_request.conversation_history) > 30 else chat_request.conversation_history
             history = [
                 {"role": msg.role, "content": msg.content}
-                for msg in chat_request.conversation_history
+                for msg in conversation
             ]
+        else:
+            # Load from database with conservative limit
+            history = await chat_history_service.get_conversation_for_api(user_id, max_messages=30)
         
-        # Get response from Clova Studio
+        # Get response from Clova Studio with user's request_id
         response = await clova_service.chat(
             message=chat_request.message,
+            request_id=current_user.clova_request_id,
             conversation_history=history
         )
         
         if response.get("success"):
+            ai_message = response.get("content", "")
+            
+            # Save conversation to database
+            await chat_history_service.add_conversation(
+                user_id=user_id,
+                user_message=chat_request.message,
+                assistant_message=ai_message
+            )
+            
             chat_response = ChatResponse(
-                message=response.get("content", ""),
+                message=ai_message,
                 success=True,
                 error=None
             )
@@ -169,6 +200,92 @@ async def chat_with_ai(
         return error_response(
             message=f"Error in chat: {str(e)}",
             code="CHAT_ERROR"
+        )
+
+
+@router.get(
+    "/chat-history",
+    response_model=APIResponse[Dict[str, Any]],
+    status_code=status.HTTP_200_OK
+)
+async def get_chat_history(
+    limit: Optional[int] = 50,
+    current_user: UserInDB = Depends(get_current_user)
+) -> Dict[str, Any]:
+    """
+    Get user's chat history.
+    
+    - **limit**: Maximum number of messages to return (default 50)
+    
+    Rate limit: 100 requests per minute
+    """
+    try:
+        # Apply rate limiting
+        await apply_rate_limit(str(current_user.id), "chat_history")
+        
+        user_id = str(current_user.id)
+        history = await chat_history_service.get_user_chat_history(user_id, limit=limit)
+        
+        if history:
+            response_data = {
+                "messages": [
+                    {
+                        "role": msg.role,
+                        "content": msg.content,
+                        "timestamp": msg.timestamp.isoformat()
+                    }
+                    for msg in history.messages
+                ],
+                "total_messages": len(history.messages),
+                "last_updated": history.updated_at.isoformat()
+            }
+            return success_response(
+                data=response_data,
+                message="Chat history retrieved successfully"
+            )
+        else:
+            return success_response(
+                data={"messages": [], "total_messages": 0},
+                message="No chat history found"
+            )
+            
+    except Exception as e:
+        return error_response(
+            message=f"Error retrieving chat history: {str(e)}",
+            code="HISTORY_ERROR"
+        )
+
+
+@router.delete(
+    "/chat-history",
+    response_model=APIResponse[Dict[str, bool]],
+    status_code=status.HTTP_200_OK
+)
+async def clear_chat_history(
+    current_user: UserInDB = Depends(get_current_user)
+) -> Dict[str, Any]:
+    """
+    Clear all chat history for the current user.
+    """
+    try:
+        user_id = str(current_user.id)
+        success = await chat_history_service.clear_user_history(user_id)
+        
+        if success:
+            return success_response(
+                data={"cleared": True},
+                message="Chat history cleared successfully"
+            )
+        else:
+            return error_response(
+                message="Failed to clear chat history",
+                code="CLEAR_FAILED"
+            )
+            
+    except Exception as e:
+        return error_response(
+            message=f"Error clearing chat history: {str(e)}",
+            code="CLEAR_ERROR"
         )
 
 
