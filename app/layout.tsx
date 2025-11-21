@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Be_Vietnam_Pro } from "next/font/google";
+import { Playfair_Display, Be_Vietnam_Pro, Montserrat } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -14,6 +14,13 @@ const beVietnam = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
   weight: ["400", "600", "900"],
   variable: "--font-be-vietnam",
+  display: "swap",
+});
+
+const montserrat = Montserrat({
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-montserrat",
   display: "swap",
 });
 
@@ -60,7 +67,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" suppressHydrationWarning>
-      <body className={`${playfair.variable} ${beVietnam.variable} antialiased`}>
+      <body className={`${playfair.variable} ${beVietnam.variable} ${montserrat.variable} font-sans antialiased`}>
         <Toaster
           position="top-right"
           richColors

@@ -62,7 +62,7 @@ export default function MapSearch({ onLocationSelect }: MapSearchProps) {
   };
 
   return (
-    <div className="absolute top-3 left-3 right-3 z-[1000]" ref={wrapperRef}>
+    <div className="absolute top-3 left-13 right-3 md:right-[80px] z-[1000]" ref={wrapperRef}>
       <div className="relative w-full bg-white rounded-lg shadow-lg border border-gray-200">
         <div className="flex items-center px-3 py-2">
           <Search className="w-5 h-5 text-gray-400 mr-2" />
@@ -88,7 +88,7 @@ export default function MapSearch({ onLocationSelect }: MapSearchProps) {
 
         {/* Dropdown kết quả */}
         {showResults && results.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-xl border border-gray-100 max-h-[60vh] overflow-y-auto divide-y divide-gray-100">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-xl border border-gray-100 max-h-[60vh] overflow-y-auto divide-y divide-gray-100 z-[2000]">
             {results.map((item) => (
               <button
                 key={item.place_id}

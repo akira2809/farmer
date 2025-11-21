@@ -53,7 +53,7 @@ export default async function Dashboard() {
         <div className="flex flex-col gap-[18px] items-start justify-center relative shrink-0 w-full max-w-full">
           <div className="box-border flex flex-col gap-[18px] md:gap-[22px] items-center justify-center px-[20px] md:px-[40px] lg:px-[50px] py-0 relative shrink-0 w-full max-w-full pt-6 md:pt-8">
             <div className="bg-transparent h-[30px] md:h-[40px] shrink-0 w-full" />
-            <div className="capitalize font-['Playfair_Display'] font-semibold leading-[1.3] relative shrink-0 text-[22px] md:text-[28px] lg:text-[32px] text-black text-center w-full">
+            <div className="capitalize font-['Montserrat'] font-semibold leading-[1.3] relative shrink-0 text-[22px] md:text-[28px] lg:text-[32px] text-black text-center w-full">
               <p className="mb-0">Chào A,</p>
               <p>Bạn Cần Gì? Hãy Nói Cho Tôi Biết</p>
             </div>

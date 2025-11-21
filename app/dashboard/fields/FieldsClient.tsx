@@ -48,7 +48,7 @@ export default function FieldsClient({ fields }: { fields: TFarm[] }) {
         <div className="flex flex-[1_0_0] flex-col gap-[30px] md:gap-[40px] items-center min-h-screen w-full max-w-full relative pb-20 md:pb-8 md:ml-[60px] lg:ml-[72px] overflow-x-hidden">
           <div className="box-border flex flex-col gap-[18px] md:gap-[22px] items-center justify-center px-[20px] md:px-[40px] lg:px-[60px] py-0 relative shrink-0 w-full pt-6 md:pt-8">
             <div className="bg-transparent h-[60px] md:h-[70px] shrink-0 w-full" />
-            <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[28px] md:text-[36px] text-black text-center w-full">
+            <p className="capitalize font-['Montserrat'] font-semibold leading-[normal] relative shrink-0 text-[28px] md:text-[36px] text-black text-center w-full">
               Ruộng Của Bạn
             </p>
 
@@ -57,19 +57,19 @@ export default function FieldsClient({ fields }: { fields: TFarm[] }) {
                 onClick={() => setShowModal(true)}
                 className="bg-[#2e8623] border border-[#fffcf6] border-solid box-border flex gap-[12px] md:gap-[15px] items-center justify-center px-[18px] md:px-[22px] py-[14px] md:py-[18px] relative rounded-[22px] shrink-0 hover:bg-[#267019] transition-colors"
               >
-                <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[16px] md:text-[18px] text-[#ebf5ed]">
+                <p className="capitalize font-['Montserrat'] font-semibold leading-[normal] relative shrink-0 text-[16px] md:text-[18px] text-[#ebf5ed]">
                   Thêm Ruộng
                 </p>
                 <Plus className="size-[22px] md:size-[27px] text-[#fffcf6]" />
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-[25px] md:gap-[30px] items-start justify-start relative shrink-0 w-full max-w-[1059px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 w-full max-w-[1059px]">
               {fields?.length > 0 ? fields.map((field) => (
                 <Link
                   key={field.id || field.name}
                   href={`/dashboard/fields/${field.id}`}
-                  className="bg-[#fffcf6] border-2 border-[#2e8623] border-solid relative rounded-[14.09px] shrink-0 w-full sm:w-[calc(50%-12.5px)] lg:w-[332.691px] hover:shadow-lg transition-shadow group"
+                  className="bg-[#fffcf6] border-2 border-[#2e8623] border-solid relative rounded-[14.09px] hover:shadow-lg transition-shadow group h-full flex flex-col"
                 >
                   <div className="box-border flex flex-col gap-[20px] md:gap-[23.484px] items-center overflow-clip pb-[28px] md:pb-[35.226px] pt-[18px] md:pt-[23.484px] px-[18px] md:px-[23.484px] relative rounded-[inherit]">
                     <div className="relative h-[140px] md:h-[165.954px] shrink-0 w-full rounded-[8px] overflow-hidden">
@@ -80,7 +80,7 @@ export default function FieldsClient({ fields }: { fields: TFarm[] }) {
                     </div>
                     <div className="flex flex-col gap-[5px] md:gap-[6.262px] items-start leading-[normal] relative shrink-0 text-black w-full">
                       <div className="flex justify-between items-start w-full">
-                        <p className="font-['Be_Vietnam_Pro'] font-semibold relative shrink-0 text-[20px] md:text-[25.05px]">
+                        <p className="font-['Montserrat'] font-semibold relative shrink-0 text-[20px] md:text-[25.05px]">
                           {field.name || 'N/A'}
                         </p>
                         <div className="flex gap-1">
@@ -100,16 +100,16 @@ export default function FieldsClient({ fields }: { fields: TFarm[] }) {
                           </button>
                         </div>
                       </div>
-                      <p className="font-['Be_Vietnam_Pro'] relative shrink-0 text-[14px] md:text-[15.656px] w-full">
+                      <p className="font-['Montserrat'] relative shrink-0 text-[14px] md:text-[15.656px] w-full">
                         Ngày trồng: {field.planting_date ? new Date(field.planting_date).toLocaleDateString('vi-VN') : 'N/A'}
                       </p>
-                      <p className="font-['Be_Vietnam_Pro'] relative shrink-0 text-[14px] md:text-[15.656px] w-full">
+                      <p className="font-['Montserrat'] relative shrink-0 text-[14px] md:text-[15.656px] w-full">
                         Tình Trạng: {field.crop_status || 'N/A'}
                       </p>
-                      <p className="font-['Be_Vietnam_Pro'] relative shrink-0 text-[14px] md:text-[15.656px] w-full">
+                      <p className="font-['Montserrat'] relative shrink-0 text-[14px] md:text-[15.656px] w-full">
                         Loại cây: {field.crop_type || 'N/A'}
                       </p>
-                      <p className="font-['Be_Vietnam_Pro'] relative shrink-0 text-[14px] md:text-[15.656px] w-full">
+                      <p className="font-['Montserrat'] relative shrink-0 text-[14px] md:text-[15.656px] w-full">
                         Diện tích: {field.area ? `${field.area} m²` : 'N/A'}
                       </p>
                     </div>
@@ -129,6 +129,7 @@ export default function FieldsClient({ fields }: { fields: TFarm[] }) {
       <AddFieldModal
         showModal={showModal}
         onClose={() => setShowModal(false)}
+        farms={fields}
       />
 
       <EditFieldModal

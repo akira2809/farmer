@@ -91,104 +91,104 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="bg-[#fffcf6] flex flex-col md:flex-row items-start relative min-h-screen w-full overflow-hidden">
-      <Sidebar activePage="profile" />
+    <div className="bg-[#fffcf6] min-h-screen w-full overflow-x-hidden">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block fixed left-0 top-0 bottom-0 z-50">
+        <Sidebar activePage="profile" />
+      </div>
 
-      <div className="box-border flex flex-[1_0_0] flex-col gap-[15px] md:gap-[18px] h-full items-center min-h-px min-w-px overflow-y-auto pb-[30px] pt-[40px] md:pt-[50px] px-[20px] md:px-[40px] relative shrink-0 w-full md:ml-[60px] lg:ml-[72px]">
+      {/* Main Content */}
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-4 md:pt-12 pb-24 md:pb-12 md:ml-[60px] lg:ml-[72px] relative z-0">
+        {/* Mobile Spacer - Only shows on mobile */}
+        <div className="md:hidden h-16"></div>
         {/* Avatar */}
-        <div className="flex gap-[20px] items-center justify-center relative shrink-0 pt-4">
-          <CircleUserRound className="size-[90px] md:size-[120px] text-[#2e8623]" />
+        <div className="flex flex-col items-center mb-6 sm:mb-8">
+          <CircleUserRound className="size-24 sm:size-32 text-[#2e8623]" />
+          <h1 className="mt-4 text-2xl sm:text-3xl font-semibold text-gray-900">Hồ sơ cá nhân</h1>
         </div>
 
-        <div className="h-[15px] md:h-[18px] shrink-0" />
-
         {/* Form Fields */}
-        <div className="flex flex-col gap-[20px] md:gap-[25px] items-start justify-center relative shrink-0 w-full">
-          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[40px] md:px-[120px] lg:px-[160px] py-0 relative shrink-0 w-full">
-            <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
-              <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
-                Họ và Tên
-              </p>
-              <input
-                type="text"
-                value={formData.full_name}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
-              />
-            </div>
+        <div className="space-y-6 w-full max-w-2xl mx-auto">
+          {/* Full Name */}
+          <div className="space-y-2">
+            <label className="block text-sm sm:text-base font-medium text-gray-700">Họ và Tên</label>
+            <input
+              type="text"
+              value={formData.full_name}
+              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+              className="block w-full rounded-lg border border-[#2e8623] bg-[#ebf5ed] px-4 py-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-[#2e8623] focus:border-[#2e8623] sm:text-sm transition-colors"
+              placeholder="Nhập họ và tên"
+            />
           </div>
 
-          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[185px] py-0 relative shrink-0 w-full">
-            <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
-              <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
-                Tỉnh/Thành Phố
-              </p>
-              <input
-                type="text"
-                value={formData.province}
-                onChange={(e) => setFormData({ ...formData, province: e.target.value })}
-                className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
-              />
-            </div>
+          {/* Province/City */}
+          <div className="space-y-2">
+            <label className="block text-sm sm:text-base font-medium text-gray-700">Tỉnh/Thành Phố</label>
+            <input
+              type="text"
+              value={formData.province}
+              onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+              className="block w-full rounded-lg border border-[#2e8623] bg-[#ebf5ed] px-4 py-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-[#2e8623] focus:border-[#2e8623] sm:text-sm transition-colors"
+              placeholder="Nhập tỉnh/thành phố"
+            />
           </div>
 
-          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[185px] py-0 relative shrink-0 w-full">
-            <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
-              <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
-                Số điện thoại
-              </p>
-              <input
-                type="tel"
-                value={user?.phone || ""}
-                disabled
-                className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] opacity-50 rounded-[18px] shrink-0 w-full px-4 outline-none cursor-not-allowed"
-              />
-            </div>
+          {/* Phone Number (disabled) */}
+          <div className="space-y-2">
+            <label className="block text-sm sm:text-base font-medium text-gray-700">Số điện thoại</label>
+            <input
+              type="tel"
+              value={user?.phone || ""}
+              disabled
+              className="block w-full rounded-lg border border-[#2e8623] bg-[#ebf5ed]/50 px-4 py-3 text-gray-500 shadow-sm sm:text-sm cursor-not-allowed"
+            />
           </div>
 
           {/* Change Password Link */}
-          <div className="box-border flex flex-col gap-[10px] items-start overflow-clip px-[50px] md:px-[185px] py-0 relative shrink-0 w-full">
+          <div className="pt-2">
             <button
               onClick={() => router.push("/dashboard/profile/change-password")}
-              className="text-[#2e8623] font-['Be_Vietnam_Pro'] font-semibold text-[16px] md:text-[18px] hover:underline"
+              className="text-[#2e8623] font-medium hover:underline text-sm sm:text-base transition-colors"
             >
               Đổi mật khẩu →
             </button>
           </div>
 
-          {/* Buttons */}
-          <div className="box-border flex flex-col gap-[10px] items-start pb-0 pt-[16px] px-0 relative shrink-0 w-full">
-            <div className="box-border flex flex-col gap-[10px] items-start px-[100px] md:px-[300px] py-0 relative shrink-0 w-full">
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="bg-[#2e8623] border border-[#fffcf6] border-solid box-border flex gap-[15px] md:gap-[20px] h-[60px] md:h-[71px] items-center justify-center px-[20px] md:px-[25px] py-[16px] md:py-[20px] relative rounded-[20px] shrink-0 w-full hover:bg-[#267019] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[17px] md:text-[20px] text-[#ebf5ed]">
-                  {saving ? "Đang lưu..." : "Lưu Thông Tin"}
-                </p>
-              </button>
-            </div>
-            <div className="box-border flex flex-col gap-[10px] items-start px-[100px] md:px-[300px] py-0 relative shrink-0 w-full">
-              <button
-                onClick={handleLogout}
-                className="bg-[#dc2626] border border-[#fffcf6] border-solid box-border flex gap-[15px] md:gap-[20px] h-[60px] md:h-[71px] items-center justify-center px-[20px] md:px-[25px] py-[16px] md:py-[20px] relative rounded-[20px] shrink-0 w-full hover:bg-[#b91c1c] transition-colors"
-              >
-                <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[17px] md:text-[20px] text-[#ebf5ed]">
-                  Đăng Xuất
-                </p>
-              </button>
-            </div>
+          {/* Action Buttons */}
+          <div className="space-y-4 pt-4">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-[#2e8623] hover:bg-[#267019] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2e8623] disabled:opacity-50 transition-colors"
+            >
+              {saving ? "Đang lưu..." : "Lưu Thông Tin"}
+            </button>
+            
+            <button
+              onClick={handleLogout}
+              className="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-[#dc2626] hover:bg-[#b91c1c] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+            >
+              Đăng Xuất
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Decorative Image */}
-      <div className="hidden lg:flex absolute items-center justify-center right-[100px] bottom-[50px] -z-10">
-        <div className="flex-none rotate-[350.359deg]">
-          <div className="h-[120.156px] relative w-[145.332px]">
-            <Image alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgImage10} width={145} height={120} />
-          </div>
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
+        <Sidebar activePage="profile" />
+      </div>
+
+      {/* Decorative Image - Only show on larger screens */}
+      <div className="hidden lg:block fixed right-8 bottom-8 -z-10">
+        <div className="w-32 h-auto">
+          <Image 
+            src={imgImage10} 
+            alt=""
+            width={128}
+            height={128}
+            className="w-full h-auto"
+          />
         </div>
       </div>
     </div>

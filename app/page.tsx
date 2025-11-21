@@ -23,24 +23,40 @@ export default function Home() {
       </div>
 
       {/* Hero Banner - Higher Position */}
-      <div className="box-border flex gap-[10px] h-[300px] md:h-[399px] items-end justify-end pb-[30px] md:pb-[49px] pl-[20px] md:pl-[77px] pr-[20px] md:pr-[100px] pt-[120px] md:pt-[200px] relative rounded-[18px] shrink-0 w-full -mt-10 md:-mt-16 lg:-mt-20">
-        <Image alt="" className="absolute inset-0 object-cover pointer-events-none rounded-[18px] size-full" src={imgFrame1} fill priority />
+      <div className="box-border flex flex-col md:flex-row gap-4 md:gap-6 h-auto min-h-[350px] md:h-[500px] lg:h-[600px] items-start md:items-end justify-end p-6 md:py-16 md:px-8 lg:px-16 xl:px-32 relative rounded-[18px] w-full mt-4 md:mt-0">
+        <Image 
+          alt="Nông nghiệp 4.0" 
+          className="absolute inset-0 object-cover pointer-events-none rounded-[18px] w-full h-full" style={{ objectPosition: 'center' }}
+          src={imgFrame1} 
+          fill 
+          priority 
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
         <div className="absolute bg-gradient-to-b from-[rgba(25,31,25,0.2)] to-[#191f19] inset-0 rounded-[18px] -z-10" />
-        <div className="capitalize flex-[1_0_0] font-['Playfair_Display'] font-semibold leading-[1.2] min-h-px min-w-px relative shrink-0 text-[32px] md:text-[48px] lg:text-[56px] text-[#ebf5ed] z-10">
-          <p className="mb-0">{`Nông nghiệp 4.0: `}</p>
-          <p className="mb-0">{`Cây trong tầm tay - `}</p>
-          <p>Mùa màng bội thu.</p>
+        
+        <div className="w-full md:flex-1 space-y-2 md:space-y-3 z-10 max-w-4xl">
+          <h1 className="font-['Montserrat'] font-black not-italic leading-tight tracking-normal text-3xl xs:text-4xl sm:text-5xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-[64px] text-[#ebf5ed] mb-4 md:mb-6 capitalize">
+            <p className="mb-0">Nông nghiệp 4.0:</p>
+            <p className="mb-0">Cây trong tầm tay -</p>
+            <p>Mùa màng bội thu.</p>
+          </h1>
         </div>
-        <Link href="/signin" className="bg-[#d68b00] border border-[#fffcf6] border-solid box-border flex gap-[15px] md:gap-[20px] items-center justify-end px-[20px] md:px-[25px] py-[15px] md:py-[20px] relative rounded-[20px] shrink-0 z-10 hover:bg-[#c07d00] transition-colors">
-          <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[16px] md:text-[18px] text-[#ebf5ed]">
-            Bắt Đầu Ngay
-          </p>
-          <ArrowRight className="size-[20px] md:size-[24px] text-[#ebf5ed]" />
-        </Link>
+        
+        <div className="w-full md:w-auto z-10">
+          <Link 
+            href="/signin" 
+            className="inline-flex items-center justify-center gap-2 md:gap-4 px-4 py-3 md:px-6 md:py-4 bg-[#d68b00] border border-[#fffcf6] rounded-xl md:rounded-2xl hover:bg-[#c07d00] transition-colors w-full md:w-auto"
+          >
+            <span className="capitalize font-['Be_Vietnam_Pro'] font-semibold text-sm sm:text-base md:text-lg text-[#ebf5ed] whitespace-nowrap">
+              Bắt Đầu Ngay
+            </span>
+            <ArrowRight className="size-5 md:size-6 text-[#ebf5ed] flex-shrink-0" />
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-col gap-[30px] items-start justify-center relative shrink-0 w-full">
-        <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[28px] md:text-[36px] text-black text-center w-full">
+        <p className="capitalize font-['Montserrat'] font-semibold leading-[normal] relative shrink-0 text-[28px] md:text-[36px] text-black text-center w-full">
           Giải Pháp Toàn Diện Cho Nông Nghiệp
         </p>
         <div className="gap-[10px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 auto-rows-auto overflow-clip relative shrink-0 w-full">
@@ -95,7 +111,7 @@ export default function Home() {
       </div>
 
       <div className="box-border flex flex-col gap-[30px] items-start justify-center px-[20px] md:px-[40px] py-0 relative shrink-0 w-full">
-        <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[28px] md:text-[36px] text-black text-center w-full">
+        <p className="capitalize font-['Montserrat'] font-semibold leading-[normal] relative shrink-0 text-[28px] md:text-[36px] text-black text-center w-full">
           Về Chúng Tôi
         </p>
         <div className="bg-[#d9d9d9] h-[180px] md:h-[220px] shrink-0 w-full rounded-[18px]" />
@@ -106,7 +122,7 @@ export default function Home() {
       </div>
 
       <div className="box-border flex flex-col gap-[30px] items-center justify-center px-[20px] md:px-[40px] py-0 relative shrink-0 w-full">
-        <p className="capitalize font-['Playfair_Display'] font-semibold leading-[1.3] relative shrink-0 text-[28px] md:text-[36px] text-black text-center max-w-[800px] z-10">
+        <p className="capitalize font-[Montserrat'] font-semibold leading-[1.3] relative shrink-0 text-[28px] md:text-[36px] text-black text-center max-w-[800px] z-10">
           Bắt Đầu Quản Lí Ruộng của bạn Thôi!
         </p>
         <Link href="/signin" className="bg-[#2e8623] border border-[#fffcf6] border-solid box-border flex gap-[15px] md:gap-[20px] items-center justify-center px-[25px] md:px-[35px] py-[15px] md:py-[20px] relative rounded-[20px] shrink-0 w-full max-w-[600px] hover:bg-[#267019] transition-colors z-10">
