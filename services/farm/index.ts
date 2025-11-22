@@ -9,13 +9,14 @@ export default {
   createFarm: (payload: FormData) => {
     return useApiPostFormData(API_ROUTE.Farm.createFarm, payload);
   },
-  getFarms: (search?: string, startDate?: string, endDate?: string) => {
+  getFarms: (search?: string, startDate?: string, endDate?: string, cropStatus?: string) => {
     let url = API_ROUTE.Farm.getFarms;
     const params = new URLSearchParams();
 
     if (search) params.append('search', search);
     if (startDate) params.append('start_date', startDate);
     if (endDate) params.append('end_date', endDate);
+    if (cropStatus) params.append('crop_status', cropStatus);
 
     if (params.toString()) {
       url += `?${params.toString()}`;

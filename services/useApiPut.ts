@@ -8,7 +8,7 @@ const useApiPut = async (url: string, payload: any) => {
   return await fetchJsonWithAuth(funcUtils.combineURL(url), {
     method: 'PUT',
     body: JSON.stringify(payload),
-    ...funcUtils.FetchHeaders(isServer ? await getTokenUser() : undefined),
+    ...funcUtils.FetchHeaders(isServer ? await getTokenUser() : undefined, false),
   });
 };
 

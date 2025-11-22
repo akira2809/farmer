@@ -8,10 +8,10 @@ import WeatherAdviceCarousel from "./components/WeatherAdviceCarousel";
 import Link from "next/link";
 import SearchInput from "./components/SearchInput";
 
-async function getData(search?: string, startDate?: string, endDate?: string): Promise<TFarm[]> {
+async function getData(search?: string, startDate?: string, endDate?: string, cropStatus?: string): Promise<TFarm[]> {
   try {
-    console.log('Fetching farms with params:', { search, startDate, endDate });
-    const productRes = await farmApi.getFarms(search, startDate, endDate);
+    console.log('Fetching farms with params:', { search, startDate, endDate, cropStatus });
+    const productRes = await farmApi.getFarms(search, startDate, endDate, cropStatus);
     // Extract farm data from response structure
     const response = productRes as any;
     const farms = response?.data?.data ||
@@ -53,14 +53,16 @@ export default async function Dashboard(props: {
     search?: string;
     start_date?: string;
     end_date?: string;
+    crop_status?: string;
   }>;
 }) {
   const searchParams = await props.searchParams;
   const search = searchParams?.search;
   const startDate = searchParams?.start_date;
   const endDate = searchParams?.end_date;
+  const cropStatus = searchParams?.crop_status;
 
-  const data = await getData(search, startDate, endDate);
+  const data = await getData(search, startDate, endDate, cropStatus);
 
   return (
     <div className="bg-[#fffcf6] flex flex-col md:flex-row items-start relative min-h-screen w-full overflow-hidden">

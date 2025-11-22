@@ -2,6 +2,7 @@
 
 import { TFarm, TCreateFarm } from '@/models/farm';
 import farmApi from '@/services/farm';
+import { revalidatePath } from 'next/cache';
 
 interface ApiResponse<T = unknown> {
   success?: boolean;
@@ -150,6 +151,8 @@ export async function updateCropStatusAction(
     const apiResponse = response as ApiResponse<TFarm>;
 
     if (apiResponse?.success && apiResponse?.data) {
+      revalidatePath(`/dashboard/fields/${farmId}`);
+      revalidatePath('/dashboard/fields'); // Cập nhật cả danh sách bên ngoài
       return { success: true, data: apiResponse.data };
     }
 
