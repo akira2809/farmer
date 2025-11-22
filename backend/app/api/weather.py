@@ -206,7 +206,8 @@ async def get_weather_advice(
         advice_result = await clova_service.get_weather_advice(
             weather.model_dump(),
             farm.name,
-            current_user.clova_request_id
+            current_user.clova_request_id,
+            str(farm.id)
         )
         
         if advice_result["success"]:

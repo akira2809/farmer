@@ -33,6 +33,15 @@ async def connect_to_mongo():
     
     # Create index for chat_history collection
     await db.db.chat_history.create_index("user_id")
+
+    # 1. Index TTL: Tự động xóa document sau 24h kể từ created_at
+    await db.db.weather_advice_cache.create_index("created_at", expireAfterSeconds=86400)
+    
+    # 2. Compound Index: Đảm bảo mỗi farm chỉ có 1 cache mỗi ngày & tìm kiếm nhanh
+    await db.db.weather_advice_cache.create_index(
+        [("farm_id", 1), ("date", 1)], 
+        unique=True
+    )
     
     print(f"Connected to MongoDB: {settings.MONGODB_DB_NAME}")
 

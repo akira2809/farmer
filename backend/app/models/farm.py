@@ -33,6 +33,17 @@ class GeoJSONPoint(BaseModel):
         return v
 
 
+class FarmStatusHistoryItem(BaseModel):
+    """Model for farm status history item"""
+    status: CropStatus
+    date: datetime = Field(default_factory=datetime.utcnow)
+    
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat()
+        }
+
+
 class FarmInDB(BaseModel):
     """Farm model stored in MongoDB"""
     id: Optional[PyObjectId] = Field(None, alias="_id")
@@ -43,10 +54,12 @@ class FarmInDB(BaseModel):
     variety: Optional[str] = None  # Giống cây (e.g., OM 18, IR64)
     area: Optional[float] = None
     crop_status: CropStatus = CropStatus.PREPARING
+    status_history: List[FarmStatusHistoryItem] = []
     planting_date: Optional[datetime] = None
     expected_harvest_date: Optional[datetime] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+    image: Optional[str] = None
     
     class Config:
         populate_by_name = True
@@ -67,6 +80,7 @@ class FarmCreate(BaseModel):
     crop_status: CropStatus = CropStatus.PREPARING
     planting_date: Optional[datetime] = None
     expected_harvest_date: Optional[datetime] = None
+    image: Optional[str] = None
     
     @field_validator('expected_harvest_date')
     @classmethod
@@ -86,6 +100,7 @@ class FarmUpdate(BaseModel):
     crop_status: Optional[CropStatus] = None
     planting_date: Optional[datetime] = None
     expected_harvest_date: Optional[datetime] = None
+    image: Optional[str] = None
     
     @field_validator('expected_harvest_date')
     @classmethod
@@ -106,8 +121,10 @@ class FarmResponse(BaseModel):
     variety: Optional[str] = None
     area: Optional[float] = None
     crop_status: CropStatus
+    status_history: List[FarmStatusHistoryItem] = []
     planting_date: Optional[datetime] = None
     expected_harvest_date: Optional[datetime] = None
+    image: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     
@@ -120,3 +137,6 @@ class FarmResponse(BaseModel):
 class FarmFilters(BaseModel):
     """Schema for filtering farms"""
     crop_status: Optional[CropStatus] = None
+    search: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None

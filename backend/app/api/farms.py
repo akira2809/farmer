@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Form, File, UploadFile
 from typing import Dict, Any, List, Optional
+from datetime import datetime
 
 from app.models.farm import (
     FarmCreate,
     FarmUpdate,
     FarmResponse,
     FarmFilters,
-    CropStatus
+    CropStatus,
+    GeoJSONPoint
 )
 from app.models.user import UserInDB
 from app.models.api_response import APIResponse, success_response, error_response
@@ -29,24 +31,48 @@ def get_farm_service() -> FarmService:
     status_code=status.HTTP_201_CREATED
 )
 async def create_farm(
-    farm_data: FarmCreate,
+    name: str = Form(..., min_length=1, max_length=200),
+    latitude: float = Form(...),
+    longitude: float = Form(...),
+    crop_type: Optional[str] = Form(None, max_length=100),
+    variety: Optional[str] = Form(None, max_length=100),
+    area: Optional[float] = Form(None, ge=0),
+    crop_status: CropStatus = Form(CropStatus.PREPARING),
+    planting_date: Optional[datetime] = Form(None),
+    expected_harvest_date: Optional[datetime] = Form(None),
+    image: Optional[UploadFile] = File(None),
     current_user: UserInDB = Depends(get_current_user),
     farm_service: FarmService = Depends(get_farm_service)
 ) -> Dict[str, Any]:
     """
-    Create a new farm with crop information (authenticated).
+    Create a new farm with crop information and optional image (authenticated).
     
     - **name**: Farm name
-    - **location**: GeoJSON Point with coordinates [longitude, latitude]
-    - **crop_type**: Type of crop (e.g., Lúa, Cà chua) (optional)
-    - **variety**: Crop variety (e.g., OM 18, IR64) (optional)
+    - **latitude**: Latitude coordinate
+    - **longitude**: Longitude coordinate
+    - **crop_type**: Type of crop (optional)
+    - **variety**: Crop variety (optional)
     - **area**: Farm area in square meters (optional)
     - **crop_status**: Current crop status (default: preparing)
     - **planting_date**: Date when crop was planted (optional)
     - **expected_harvest_date**: Expected harvest date (optional)
+    - **image**: Farm image file (optional)
     """
     try:
-        farm = await farm_service.create_farm(str(current_user.id), farm_data)
+        # Construct FarmCreate object
+        location = GeoJSONPoint(coordinates=[longitude, latitude])
+        farm_data = FarmCreate(
+            name=name,
+            location=location,
+            crop_type=crop_type,
+            variety=variety,
+            area=area,
+            crop_status=crop_status,
+            planting_date=planting_date,
+            expected_harvest_date=expected_harvest_date
+        )
+        
+        farm = await farm_service.create_farm(str(current_user.id), farm_data, image)
         return success_response(
             data=farm.model_dump(),
             message="Farm created successfully"
@@ -64,15 +90,26 @@ async def create_farm(
 )
 async def get_farms(
     crop_status: Optional[CropStatus] = Query(None, description="Filter by crop status"),
+    search: Optional[str] = Query(None, description="Search by name, crop type, or variety"),
+    start_date: Optional[datetime] = Query(None, description="Filter by planting date (start)"),
+    end_date: Optional[datetime] = Query(None, description="Filter by planting date (end)"),
     current_user: UserInDB = Depends(get_current_user),
     farm_service: FarmService = Depends(get_farm_service)
 ) -> Dict[str, Any]:
     """
-    Get all farms for the authenticated user with optional crop_status filter.
+    Get all farms for the authenticated user with optional crop_status filter and search.
     
     - **crop_status**: Optional filter by crop status (preparing, planted, growing, flowering, harvested, fallow)
+    - **search**: Optional search term for name, crop type, or variety
+    - **start_date**: Optional filter by planting date (start)
+    - **end_date**: Optional filter by planting date (end)
     """
-    filters = FarmFilters(crop_status=crop_status) if crop_status else None
+    filters = FarmFilters(
+        crop_status=crop_status, 
+        search=search,
+        start_date=start_date,
+        end_date=end_date
+    ) if crop_status or search or start_date or end_date else None
     farms = await farm_service.get_user_farms(str(current_user.id), filters)
     
     return success_response(
@@ -123,7 +160,14 @@ async def get_farm(
 )
 async def update_farm(
     farm_id: str,
-    farm_data: FarmUpdate,
+    name: Optional[str] = Form(None, min_length=1, max_length=200),
+    crop_type: Optional[str] = Form(None, max_length=100),
+    variety: Optional[str] = Form(None, max_length=100),
+    area: Optional[float] = Form(None, ge=0),
+    crop_status: Optional[CropStatus] = Form(None),
+    planting_date: Optional[datetime] = Form(None),
+    expected_harvest_date: Optional[datetime] = Form(None),
+    image: Optional[UploadFile] = File(None),
     current_user: UserInDB = Depends(get_current_user),
     farm_service: FarmService = Depends(get_farm_service)
 ) -> Dict[str, Any]:
@@ -138,6 +182,7 @@ async def update_farm(
     - **crop_status**: Updated crop status (optional)
     - **planting_date**: Updated planting date (optional)
     - **expected_harvest_date**: Updated expected harvest date (optional)
+    - **image**: Updated farm image (optional)
     """
     # Verify ownership
     is_owner = await farm_service.verify_farm_ownership(str(current_user.id), farm_id)
@@ -149,7 +194,17 @@ async def update_farm(
         )
     
     try:
-        farm = await farm_service.update_farm(farm_id, farm_data)
+        farm_data = FarmUpdate(
+            name=name,
+            crop_type=crop_type,
+            variety=variety,
+            area=area,
+            crop_status=crop_status,
+            planting_date=planting_date,
+            expected_harvest_date=expected_harvest_date
+        )
+        
+        farm = await farm_service.update_farm(farm_id, farm_data, image)
         return success_response(
             data=farm.model_dump(),
             message="Farm updated successfully"

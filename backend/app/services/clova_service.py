@@ -1,6 +1,10 @@
 import httpx
 from typing import Optional, Dict, Any
+from datetime import datetime
+from bson import ObjectId
 from app.core.config import settings
+from app.core.database import get_database
+from app.models.weather_advice_cache import WeatherAdviceCacheInDB
 
 
 class ClovaStudioService:
@@ -12,6 +16,7 @@ class ClovaStudioService:
         self.host = "https://clovastudio.stream.ntruss.com"
         self.base_url = f"{self.host}/v1/chat-completions/HCX-003"
         self.timeout = 60.0
+        self.db = get_database()
     
     async def get_disease_advice(
         self,
@@ -216,67 +221,68 @@ Trả lời bằng tiếng Việt, ngắn gọn và dễ hiểu cho nông dân. 
         self,
         weather_data: Dict[str, Any],
         location_name: str,
-        request_id: str
+        request_id: str,
+        farm_id: str
     ) -> Dict[str, Any]:
         """
-        Get weather advice from Clova Studio based on weather forecast
-        
-        Args:
-            weather_data: Weather forecast data
-            location_name: Name of the location
-            request_id: User-specific request ID for Clova Studio
-            
-        Returns:
-            Dictionary containing advice
+        Get weather advice from Clova Studio with MongoDB Caching
         """
-        import os
-        import json
-        from datetime import datetime
-        import hashlib
-
         try:
-            # 1. Check Cache
             today = datetime.now().strftime("%Y-%m-%d")
-            # Create a simple hash of location to avoid filesystem issues with special chars
-            loc_hash = hashlib.md5(location_name.encode()).hexdigest()
-            cache_dir = "cache/weather_advice"
-            cache_file = f"{cache_dir}/{today}_{loc_hash}.json"
-            
-            # Ensure cache directory exists
-            os.makedirs(cache_dir, exist_ok=True)
-            
-            if os.path.exists(cache_file):
-                try:
-                    with open(cache_file, "r", encoding="utf-8") as f:
-                        cached_data = json.load(f)
-                        return cached_data
-                except Exception as e:
-                    print(f"Cache read error: {e}")
-                    # Continue to generate if cache read fails
+            collection = self.db.weather_advice_cache
 
-            # 2. Build Prompt
+            # 1. CHECK CACHE TRONG MONGODB
+            cached_doc = await collection.find_one({
+                "farm_id": ObjectId(farm_id),
+                "date": today
+            })
+
+            if cached_doc:
+                return {
+                    "success": True,
+                    "advice": cached_doc["advice"],
+                    "location": cached_doc["location_name"],
+                    "date": today,
+                    "cached": True
+                }
+
+            # 2. NẾU KHÔNG CÓ CACHE -> GỌI CLOVA STUDIO
             prompt = self._build_weather_prompt(weather_data, location_name)
-            
-            # 3. Call Clova Studio
             response_data = await self._make_request(prompt, request_id)
+            
+            advice_content = response_data.get("content", "")
             
             result = {
                 "success": True,
-                "advice": response_data.get("content", ""),
+                "advice": advice_content,
                 "location": location_name,
                 "date": today,
                 "cached": False
             }
 
-            # 4. Save to Cache
-            try:
-                # Mark as cached for future reads
-                cache_content = result.copy()
-                cache_content["cached"] = True
-                with open(cache_file, "w", encoding="utf-8") as f:
-                    json.dump(cache_content, f, ensure_ascii=False, indent=2)
-            except Exception as e:
-                print(f"Cache write error: {e}")
+            # 3. LƯU VÀO MONGODB (Nếu có nội dung advice)
+            if advice_content:
+                try:
+                    cache_entry = WeatherAdviceCacheInDB(
+                        farm_id=ObjectId(farm_id),
+                        date=today,
+                        advice=advice_content,
+                        location_name=location_name,
+                        created_at=datetime.utcnow()
+                    )
+                    
+                    # Ensure farm_id is stored as ObjectId, not string
+                    update_data = cache_entry.model_dump(by_alias=True, exclude={"id"})
+                    update_data["farm_id"] = ObjectId(farm_id)
+
+                    # Dùng update_one với upsert=True để tránh race condition
+                    await collection.update_one(
+                        {"farm_id": ObjectId(farm_id), "date": today},
+                        {"$set": update_data},
+                        upsert=True
+                    )
+                except Exception as e:
+                    print(f"MongoDB cache write error: {e}")
 
             return result
             

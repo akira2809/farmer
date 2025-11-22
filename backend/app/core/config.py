@@ -30,6 +30,12 @@ class Settings(BaseSettings):
     # CORS Configuration
     CORS_ORIGINS: list[str] = ["*"]
 
+    # Cloudinary Configuration
+    CLOUDINARY_CLOUD_NAME: str
+    CLOUDINARY_API_KEY: str
+    CLOUDINARY_API_SECRET: str
+    CLOUDINARY_FOLDER: str = "nong-dan-ai/farms"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
