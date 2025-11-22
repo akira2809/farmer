@@ -127,85 +127,85 @@ async def detect_disease(
         )
 
 
-# @router.post(
-#     "/chat",
-#     response_model=APIResponse[ChatResponse],
-#     status_code=status.HTTP_200_OK
-# )
-# async def chat_with_ai(
-#     chat_request: ChatRequest,
-#     current_user: UserInDB = Depends(get_current_user)
-# ) -> Dict[str, Any]:
-#     """
-#     General chat with AI assistant about agriculture and plant diseases.
-#     User's chat history is automatically loaded and saved.
+@router.post(
+    "/chat",
+    response_model=APIResponse[ChatResponse],
+    status_code=status.HTTP_200_OK
+)
+async def chat_with_ai(
+    chat_request: ChatRequest,
+    current_user: UserInDB = Depends(get_current_user)
+) -> Dict[str, Any]:
+    """
+    General chat with AI assistant about agriculture and plant diseases.
+    User's chat history is automatically loaded and saved.
     
-#     - **message**: User's question or message
-#     - **conversation_history**: Optional previous conversation for context (if not provided, uses saved history)
+    - **message**: User's question or message
+    - **conversation_history**: Optional previous conversation for context (if not provided, uses saved history)
     
-#     Rate limit: 30 requests per minute
-#     """
-#     try:
-#         # Apply rate limiting
-#         await apply_rate_limit(str(current_user.id), "chat")
+    Rate limit: 30 requests per minute
+    """
+    try:
+        # Apply rate limiting
+        await apply_rate_limit(str(current_user.id), "chat")
         
-#         user_id = str(current_user.id)
+        user_id = str(current_user.id)
         
-#         # Load conversation history from database if not provided
-#         if chat_request.conversation_history:
-#             # Use provided history with max limit validation
-#             # Limit to last 30 messages to prevent token overflow
-#             conversation = chat_request.conversation_history[-30:] if len(chat_request.conversation_history) > 30 else chat_request.conversation_history
-#             history = [
-#                 {"role": msg.role, "content": msg.content}
-#                 for msg in conversation
-#             ]
-#         else:
-#             # Load from database with conservative limit
-#             history = await chat_history_service.get_conversation_for_api(user_id, max_messages=30)
+        # Load conversation history from database if not provided
+        if chat_request.conversation_history:
+            # Use provided history with max limit validation
+            # Limit to last 30 messages to prevent token overflow
+            conversation = chat_request.conversation_history[-30:] if len(chat_request.conversation_history) > 30 else chat_request.conversation_history
+            history = [
+                {"role": msg.role, "content": msg.content}
+                for msg in conversation
+            ]
+        else:
+            # Load from database with conservative limit
+            history = await chat_history_service.get_conversation_for_api(user_id, max_messages=30)
         
-#         # Get response from Clova Studio with user's request_id
-#         response = await clova_service.chat(
-#             message=chat_request.message,
-#             request_id=current_user.clova_request_id,
-#             conversation_history=history
-#         )
+        # Get response from Clova Studio with user's request_id
+        response = await clova_service.chat(
+            message=chat_request.message,
+            request_id=current_user.clova_request_id,
+            conversation_history=history
+        )
         
-#         if response.get("success"):
-#             ai_message = response.get("content", "")
+        if response.get("success"):
+            ai_message = response.get("content", "")
             
-#             # Save conversation to database
-#             await chat_history_service.add_conversation(
-#                 user_id=user_id,
-#                 user_message=chat_request.message,
-#                 assistant_message=ai_message
-#             )
+            # Save conversation to database
+            await chat_history_service.add_conversation(
+                user_id=user_id,
+                user_message=chat_request.message,
+                assistant_message=ai_message
+            )
             
-#             chat_response = ChatResponse(
-#                 message=ai_message,
-#                 success=True,
-#                 error=None
-#             )
+            chat_response = ChatResponse(
+                message=ai_message,
+                success=True,
+                error=None
+            )
             
-#             return success_response(
-#                 data=chat_response.model_dump(),
-#                 message="Chat response generated successfully"
-#             )
-#         else:
-#             return error_response(
-#                 message=response.get("error", "Failed to get AI response"),
-#                 code="CHAT_FAILED"
-#             )
+            return success_response(
+                data=chat_response.model_dump(),
+                message="Chat response generated successfully"
+            )
+        else:
+            return error_response(
+                message=response.get("error", "Failed to get AI response"),
+                code="CHAT_FAILED"
+            )
             
-#     except Exception as e:
-#         return error_response(
-#             message=f"Error in chat: {str(e)}",
-#             code="CHAT_ERROR"
-#         )
+    except Exception as e:
+        return error_response(
+            message=f"Error in chat: {str(e)}",
+            code="CHAT_ERROR"
+        )
 
 
 @router.post(
-    "/chat",
+    "/chat-with-image",
     response_model=APIResponse[ChatResponse],
     status_code=status.HTTP_200_OK
 )
