@@ -18,7 +18,7 @@ const useApiPost = async <T = any, R = any>(url: string, payload: T): Promise<R>
 };
 
 // For FormData (file uploads)
-const useApiPostFormData = async (url: string, payload: FormData) => {
+const useApiPostFormData = async <T = any, R = any>(url: string, payload: FormData): Promise<R> => {
   const isServer = typeof window === 'undefined';
   const token = isServer ? await getTokenUser() : undefined;
   
@@ -26,11 +26,13 @@ const useApiPostFormData = async (url: string, payload: FormData) => {
   // Remove Content-Type to let browser set multipart/form-data boundary
   const { headers: { 'Content-Type': _, ...headersWithoutContentType } } = headers;
   
-  return await fetchJsonWithAuth(funcUtils.combineURL(url), {
+  const response = await fetchJsonWithAuth<R>(funcUtils.combineURL(url), {
     method: 'POST',
     body: payload, // FormData - no JSON.stringify
     headers: headersWithoutContentType
   });
+  
+  return response as R;
 };
 
 export default useApiPost;

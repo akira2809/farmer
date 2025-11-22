@@ -91,14 +91,14 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="bg-[#fffcf6] min-h-screen w-full overflow-x-hidden">
+    <div className="bg-[#fffcf6] min-h-screen w-full overflow-x-hidden flex justify-center">
       {/* Desktop Sidebar */}
       <div className="hidden md:block fixed left-0 top-0 bottom-0 z-50">
         <Sidebar activePage="profile" />
       </div>
 
-      {/* Main Content */}
-      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-4 md:pt-12 pb-24 md:pb-12 md:ml-[60px] lg:ml-[72px] relative z-0">
+      {/* Main Content - Centered on desktop */}
+      <div className="w-full max-w-4xl px-4 sm:px-6 pt-4 md:pt-12 pb-24 md:pb-12 md:ml-[60px] lg:ml-[72px] relative z-0">
         {/* Mobile Spacer - Only shows on mobile */}
         <div className="md:hidden h-16"></div>
         {/* Avatar */}
@@ -107,7 +107,7 @@ export default function ProfilePage() {
           <h1 className="mt-4 text-2xl sm:text-3xl font-semibold text-gray-900">Hồ sơ cá nhân</h1>
         </div>
 
-        {/* Form Fields */}
+        {/* Form Fields - Centered with max width */}
         <div className="space-y-6 w-full max-w-2xl mx-auto">
           {/* Full Name */}
           <div className="space-y-2">

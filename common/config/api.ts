@@ -51,6 +51,8 @@ export default {
         getHistoryChat: `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/ai/chat-history`,
         // DELETE : Delete history chat
         deleteHistoryChat: `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/ai/chat-history`,
+        // POST: Chat with image
+        chatWithImage: `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/ai/chat-with-image`,
     },
     Notification: {
         // GET: Get all notifications for current user
