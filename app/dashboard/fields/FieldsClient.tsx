@@ -1,18 +1,34 @@
 "use client";
 
 import Sidebar from "../Sidebar";
-import Image from "next/image";
 import Link from "next/link";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Tractor, Sprout, Leaf, Sun, Wheat, CircleOff } from "lucide-react";
 import { useState } from "react";
-import { TFarm } from "@/models/farm";
+import { TFarm, CROP_STATUS_LABELS, CropStatus } from "@/models/farm";
 import AddFieldModal from "./components/AddFieldModal";
 import EditFieldModal from "./components/EditFieldModal";
 import { deleteFarmAction } from "@/action/farm";
 import FarmImage from "@/components/FarmImage";
 
-const img1 = "https://www.figma.com/api/mcp/asset/0f961402-38df-4a20-a6fe-dc4ea536b4a6";
-const img2 = "https://www.figma.com/api/mcp/asset/45a84cac-4791-4ebf-9f34-1f34823bfc73";
+// Helper function to get icon based on status
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case 'preparing':
+      return <Tractor className="w-full h-full text-[#2e8623]" />;
+    case 'planted':
+      return <Sprout className="w-full h-full text-[#2e8623]" />;
+    case 'growing':
+      return <Leaf className="w-full h-full text-[#2e8623]" />;
+    case 'flowering':
+      return <Sun className="w-full h-full text-yellow-500" />;
+    case 'harvested':
+      return <Wheat className="w-full h-full text-orange-500" />;
+    case 'fallow':
+      return <CircleOff className="w-full h-full text-gray-400" />;
+    default:
+      return <Sprout className="w-full h-full text-[#2e8623]" />;
+  }
+};
 
 export default function FieldsClient({ fields }: { fields: TFarm[] }) {
   const [showModal, setShowModal] = useState(false);
@@ -73,9 +89,9 @@ export default function FieldsClient({ fields }: { fields: TFarm[] }) {
                 >
                   <div className="box-border flex flex-col gap-[20px] md:gap-[23.484px] items-center overflow-clip pb-[28px] md:pb-[35.226px] pt-[18px] md:pt-[23.484px] px-[18px] md:px-[23.484px] relative rounded-[inherit]">
                     <div className="relative h-[140px] md:h-[165.954px] shrink-0 w-full rounded-[8px] overflow-hidden">
-                      <FarmImage 
-                        alt={field.name} 
-                        src={(field as any).image}
+                      <FarmImage
+                        alt={field.name}
+                        src={field.image}
                       />
                     </div>
                     <div className="flex flex-col gap-[5px] md:gap-[6.262px] items-start leading-[normal] relative shrink-0 text-black w-full">
@@ -104,7 +120,7 @@ export default function FieldsClient({ fields }: { fields: TFarm[] }) {
                         Ngày trồng: {field.planting_date ? new Date(field.planting_date).toLocaleDateString('vi-VN') : 'N/A'}
                       </p>
                       <p className="font-['Montserrat'] relative shrink-0 text-[14px] md:text-[15.656px] w-full">
-                        Tình Trạng: {field.crop_status || 'N/A'}
+                        Tình Trạng: {CROP_STATUS_LABELS[field.crop_status as CropStatus] || field.crop_status || 'N/A'}
                       </p>
                       <p className="font-['Montserrat'] relative shrink-0 text-[14px] md:text-[15.656px] w-full">
                         Loại cây: {field.crop_type || 'N/A'}
@@ -113,8 +129,8 @@ export default function FieldsClient({ fields }: { fields: TFarm[] }) {
                         Diện tích: {field.area ? `${field.area} m²` : 'N/A'}
                       </p>
                     </div>
-                    <div className="absolute h-[75px] md:h-[88.214px] right-[20px] md:right-[24px] bottom-[28px] md:bottom-[35px] w-[71px] md:w-[83.759px]">
-                      <Image alt="" className="block max-w-none size-full" src={field.crop_status?.includes('bệnh') ? img1 : img2} width={84} height={88} />
+                    <div className="absolute h-[60px] w-[60px] right-[20px] bottom-[28px] opacity-80">
+                      {getStatusIcon(field.crop_status)}
                     </div>
                   </div>
                 </Link>

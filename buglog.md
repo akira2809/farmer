@@ -2,7 +2,8 @@
 
 
 
-load api thời tiết hơi lâu vs chưa xong trong http://localhost:3000/dashboard/weather
+
+chiều cao chỗ farm ở trang /dashboard chưa đồng nhất
 
 
 

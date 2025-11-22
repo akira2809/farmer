@@ -13,8 +13,8 @@ const imgImage5 = "https://www.figma.com/api/mcp/asset/e44936b8-7287-4b14-b39d-2
 
 export default function SignIn() {
   const router = useRouter();
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("0123456789");
+  const [password, setPassword] = useState("123456aA@");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 

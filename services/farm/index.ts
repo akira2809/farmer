@@ -1,22 +1,34 @@
 import { TFarm } from '@/models/farm';
-import useApiPost from '../useApiPost';
+import useApiPost, { useApiPostFormData } from '../useApiPost';
 import useApiGet from '../useApiGet';
-import useApiPut from '../useApiPut';
+import useApiPut, { useApiPutFormData } from '../useApiPut';
 import useApiDelete from '../useApiDelete';
 import { API_ROUTE } from '@/common/config';
 
 export default {
-  createFarm: (payload: TFarm) => {
-    return useApiPost(API_ROUTE.Farm.createFarm, payload);
+  createFarm: (payload: FormData) => {
+    return useApiPostFormData(API_ROUTE.Farm.createFarm, payload);
   },
-  getFarms: () => {
-    return useApiGet(API_ROUTE.Farm.getFarms);
+  getFarms: (search?: string, startDate?: string, endDate?: string) => {
+    let url = API_ROUTE.Farm.getFarms;
+    const params = new URLSearchParams();
+
+    if (search) params.append('search', search);
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+
+    console.log('Calling API:', url);
+    return useApiGet(url);
   },
   getFarmById: (id: string) => {
     return useApiGet(API_ROUTE.Farm.getFarmById.replace(':farmId', id));
   },
-  updateFarm: (id: string, payload: TFarm) => {
-    return useApiPut(API_ROUTE.Farm.updateFarm.replace(':farmId', id), payload);
+  updateFarm: (id: string, payload: FormData) => {
+    return useApiPutFormData(API_ROUTE.Farm.updateFarm.replace(':farmId', id), payload);
   },
   updateCropStatus: (id: string, cropStatus: string) => {
     // Backend expects crop_status as query parameter, not in body

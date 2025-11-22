@@ -3,7 +3,7 @@
 import Sidebar from "../../Sidebar";
 import { useState, useMemo } from 'react';
 import { Camera, SquarePen, MapPin, Calendar } from "lucide-react";
-import { TFarm } from "@/models/farm";
+import { TFarm, CROP_STATUS_LABELS } from "@/models/farm";
 import DiseaseDetectionModal from './components/DiseaseDetectionModal';
 import CropStatusSelector from './components/CropStatusSelector';
 
@@ -66,7 +66,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
         <div className="box-border flex flex-col gap-[18px] md:gap-[22px] items-center px-[20px] md:px-[60px] py-0 relative shrink-0 w-full">
           <div className="bg-transparent h-[30px] md:h-[40px] shrink-0 w-full" />
         </div>
-        
+
         {/* Title and Edit Button */}
         <div className="flex flex-col gap-[12px] md:gap-[14px] items-center relative shrink-0 w-full">
           <div className="flex gap-[20px] md:gap-[30px] items-center justify-center relative shrink-0 w-full">
@@ -77,12 +77,12 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
               <SquarePen className="size-[16px] md:size-[18.996px] text-[#fffcf6]" />
             </button>
           </div>
-          
+
           {/* Progress Bar with Days Info */}
           <div className="flex flex-col gap-2 relative shrink-0 w-full max-w-[1138px]">
             <div className="relative w-full">
               <div className="bg-[#d9d9d9] h-[12px] w-full rounded-full" />
-              <div 
+              <div
                 className="bg-[#2e8623] h-[12px] rounded-full absolute top-0 left-0 transition-all duration-300"
                 style={{ width: `${cropProgress.percentage}%` }}
               />
@@ -152,7 +152,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
                   Loại Cây
                 </p>
-                <input 
+                <input
                   type="text"
                   defaultValue={currentFarm.crop_type || 'Chưa có thông tin'}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
@@ -166,7 +166,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
                   Giống Cây
                 </p>
-                <input 
+                <input
                   type="text"
                   defaultValue={currentFarm.variety || 'Chưa có thông tin'}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
@@ -180,7 +180,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
                   Diện Tích
                 </p>
-                <input 
+                <input
                   type="text"
                   defaultValue={currentFarm.area ? `${currentFarm.area.toLocaleString('vi-VN')} m²` : 'Chưa có thông tin'}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
@@ -194,7 +194,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
                   Vị Trí
                 </p>
-                <input 
+                <input
                   type="text"
                   defaultValue={currentFarm.location ? `${currentFarm.location.coordinates[1].toFixed(6)}, ${currentFarm.location.coordinates[0].toFixed(6)}` : 'Chưa có thông tin'}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2 text-sm"
@@ -209,7 +209,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
                   Ngày Trồng
                 </p>
-                <input 
+                <input
                   type="date"
                   defaultValue={currentFarm.planting_date ? currentFarm.planting_date.split('T')[0] : ''}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
@@ -223,22 +223,22 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
                 <p className="capitalize font-['Be_Vietnam_Pro'] font-semibold leading-[normal] relative shrink-0 text-[18px] md:text-[20px] text-[#191f19] w-full">
                   Ngày Thu Hoạch Dự Kiến
                 </p>
-                <input 
+                <input
                   type="date"
                   defaultValue={currentFarm.expected_harvest_date ? currentFarm.expected_harvest_date.split('T')[0] : ''}
                   className="bg-[#ebf5ed] border border-[#2e8623] border-solid h-[55px] rounded-[18px] shrink-0 w-full px-4 outline-none focus:border-2"
                   readOnly
                 />
               </div>
-              
+
               <div className="h-[15px] opacity-0" />
-              
+
               <p className="font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[26px] md:text-[32px] text-black text-center w-full">
                 <span className="block">Ruộng của bạn hiện tại sao rồi?</span>
                 <span className="block">Hãy chụp cho bác sĩ xanh Biết!</span>
               </p>
-              
-              <button 
+
+              <button
                 onClick={handleOpenModal}
                 className="bg-[#2e8623] border border-[#fffcf6] border-solid box-border flex gap-[15px] md:gap-[20px] items-center justify-center px-[20px] md:px-[25px] py-[16px] md:py-[20px] relative rounded-[20px] shrink-0 w-full hover:bg-[#267019] transition-colors"
               >
@@ -253,38 +253,39 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
           {/* Right Column - Status and History */}
           <div className="box-border flex flex-col gap-[30px] md:gap-[40px] items-center overflow-clip px-[30px] md:px-[70px] py-0 relative shrink-0">
             <div className="flex flex-col gap-[12px] md:gap-[15px] items-start relative shrink-0 w-full">
-              <CropStatusSelector 
+              <CropStatusSelector
                 farmId={currentFarm.id}
                 currentStatus={currentFarm.crop_status}
                 onStatusUpdated={handleStatusUpdated}
               />
-              <div className="bg-[#ffd2d2] box-border flex flex-col gap-[6px] items-start overflow-clip pb-[12px] pt-[18px] px-[28px] md:px-[38px] relative rounded-[18px] shrink-0 w-full">
-                <p className="font-['Be_Vietnam_Pro'] leading-[normal] relative shrink-0 text-[16px] md:text-[20px] text-black w-full">
-                  Đang bệnh, bạn hãy chú ý bón phân đầy đủ cho....
-                </p>
-              </div>
+
             </div>
 
             <div className="box-border flex flex-col gap-[12px] md:gap-[15px] items-start overflow-clip px-0 py-[5px] relative shrink-0 w-full">
               <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[26px] md:text-[32px] text-black text-center w-full">
                 Lịch Sử
               </p>
-              <div className="bg-[#ffd2d2] box-border flex flex-col gap-[5px] md:gap-[6px] items-start leading-[normal] overflow-clip pb-[12px] pt-[18px] px-[28px] md:px-[38px] relative rounded-[18px] shrink-0 text-black text-center w-full">
-                <p className="font-['Be_Vietnam_Pro'] font-semibold relative shrink-0 text-[20px] md:text-[24px]">
-                  Bệnh
-                </p>
-                <p className="font-['Be_Vietnam_Pro'] font-medium relative shrink-0 text-[14px] md:text-[16px]">
-                  Ngày:26/11/2026
-                </p>
-              </div>
-              <div className="bg-[#b5d5b1] box-border flex flex-col gap-[5px] md:gap-[6px] items-start leading-[normal] overflow-clip pb-[12px] pt-[18px] px-[28px] md:px-[38px] relative rounded-[18px] shrink-0 text-black text-center w-full">
-                <p className="font-['Be_Vietnam_Pro'] font-semibold relative shrink-0 text-[20px] md:text-[24px]">
-                  Lên Mầm
-                </p>
-                <p className="font-['Be_Vietnam_Pro'] font-medium relative shrink-0 text-[14px] md:text-[16px]">
-                  Ngày:26/11/2026
-                </p>
-              </div>
+
+              {currentFarm.status_history && currentFarm.status_history.length > 0 ? (
+                [...currentFarm.status_history]
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map((historyItem, index) => (
+                    <div
+                      key={index}
+                      className={`${index === 0 ? 'bg-[#b5d5b1]' : 'bg-[#ffd2d2]'
+                        } box-border flex flex-col gap-[5px] md:gap-[6px] items-start leading-[normal] overflow-clip pb-[12px] pt-[18px] px-[28px] md:px-[38px] relative rounded-[18px] shrink-0 text-black text-center w-full`}
+                    >
+                      <p className="font-['Be_Vietnam_Pro'] font-semibold relative shrink-0 text-[20px] md:text-[24px]">
+                        {CROP_STATUS_LABELS[historyItem.status as keyof typeof CROP_STATUS_LABELS] || historyItem.status}
+                      </p>
+                      <p className="font-['Be_Vietnam_Pro'] font-medium relative shrink-0 text-[14px] md:text-[16px]">
+                        {new Date(historyItem.date).toLocaleDateString('vi-VN')}
+                      </p>
+                    </div>
+                  ))
+              ) : (
+                <p className="text-center w-full text-gray-500">Chưa có lịch sử</p>
+              )}
             </div>
           </div>
         </div>

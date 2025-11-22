@@ -1,6 +1,6 @@
 'use server';
 
-import { TFarm, TCreateFarm, TCreateFarmRequest } from '@/models/farm';
+import { TFarm, TCreateFarm } from '@/models/farm';
 import farmApi from '@/services/farm';
 
 interface ApiResponse<T = unknown> {
@@ -14,7 +14,7 @@ export async function getFarmsAction(): Promise<{ success: boolean; data?: TFarm
     console.log('🌾 getFarmsAction: Starting...');
     const response = await farmApi.getFarms();
     console.log('🌾 getFarmsAction: Response:', response);
-    
+
     const apiResponse = response as ApiResponse<TFarm[]>;
 
     if (apiResponse?.success && apiResponse?.data) {
@@ -31,40 +31,38 @@ export async function getFarmsAction(): Promise<{ success: boolean; data?: TFarm
     }
 
     console.log('🌾 getFarmsAction: Failed - no valid data');
-    return { 
-      success: false, 
-      error: apiResponse?.message || 'Không thể lấy danh sách ruộng' 
+    return {
+      success: false,
+      error: apiResponse?.message || 'Không thể lấy danh sách ruộng'
     };
   } catch (error) {
     console.error('❌ Get farms error:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Lỗi không xác định' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     };
   }
 }
 
 export async function createFarmAction(fieldData: TCreateFarm): Promise<TFarm | null> {
   try {
-    // Transform form data to match backend API requirements
-    const farmPayload: TCreateFarmRequest = {
-      name: fieldData.name,
-      location: {
-        type: 'Point',
-        coordinates: [
-          parseFloat(fieldData.longitude || '0'),
-          parseFloat(fieldData.latitude || '0')
-        ]
-      },
-      crop_type: fieldData.crop_type,
-      variety: fieldData.variety,
-      area: fieldData.area ? parseFloat(fieldData.area) : undefined,
-      crop_status: 'preparing', // Backend expects 'preparing' for new farms
-      planting_date: new Date(fieldData.planting_date).toISOString(),
-      expected_harvest_date: new Date(fieldData.expected_harvest_date).toISOString()
-    };
+    // Create FormData object
+    const formData = new FormData();
+    formData.append('name', fieldData.name);
+    formData.append('latitude', fieldData.latitude || '0');
+    formData.append('longitude', fieldData.longitude || '0');
+    formData.append('crop_type', fieldData.crop_type);
+    if (fieldData.variety) formData.append('variety', fieldData.variety);
+    if (fieldData.area) formData.append('area', fieldData.area);
+    formData.append('crop_status', 'preparing');
+    formData.append('planting_date', new Date(fieldData.planting_date).toISOString());
+    formData.append('expected_harvest_date', new Date(fieldData.expected_harvest_date).toISOString());
 
-    const response = await farmApi.createFarm(farmPayload as unknown as TFarm);
+    if (fieldData.image) {
+      formData.append('image', fieldData.image);
+    }
+
+    const response = await farmApi.createFarm(formData);
     const apiResponse = response as ApiResponse<TFarm>;
     let farm = null;
 
@@ -89,22 +87,23 @@ export async function updateFarmAction(id: string, fieldData: Partial<TCreateFar
   try {
     console.log('updateFarmAction called with:', { id, fieldData });
 
-    // Transform form data to match backend API requirements
-    const farmPayload: Record<string, string | number | undefined> = {
-      name: fieldData.name,
-      crop_type: fieldData.crop_type,
-      variety: fieldData.variety,
-      area: fieldData.area ? parseFloat(fieldData.area) : undefined,
-      planting_date: fieldData.planting_date ? new Date(fieldData.planting_date).toISOString() : undefined,
-      expected_harvest_date: fieldData.expected_harvest_date ? new Date(fieldData.expected_harvest_date).toISOString() : undefined
-    };
+    // Create FormData object
+    const formData = new FormData();
+    if (fieldData.name) formData.append('name', fieldData.name);
+    if (fieldData.crop_type) formData.append('crop_type', fieldData.crop_type);
+    if (fieldData.variety) formData.append('variety', fieldData.variety);
+    if (fieldData.area) formData.append('area', fieldData.area);
+    if (fieldData.crop_status) formData.append('crop_status', fieldData.crop_status);
+    if (fieldData.planting_date) formData.append('planting_date', new Date(fieldData.planting_date).toISOString());
+    if (fieldData.expected_harvest_date) formData.append('expected_harvest_date', new Date(fieldData.expected_harvest_date).toISOString());
 
-    // Remove undefined keys
-    Object.keys(farmPayload).forEach(key => farmPayload[key] === undefined && delete farmPayload[key]);
+    if (fieldData.image) {
+      formData.append('image', fieldData.image);
+    }
 
-    console.log('Sending payload to backend:', farmPayload);
+    console.log('Sending payload to backend');
 
-    const response = await farmApi.updateFarm(id, farmPayload as unknown as TFarm);
+    const response = await farmApi.updateFarm(id, formData);
     console.log('Backend response:', response);
 
     const apiResponse = response as ApiResponse<TFarm>;
@@ -138,7 +137,7 @@ export async function deleteFarmAction(id: string): Promise<boolean> {
 }
 
 export async function updateCropStatusAction(
-  farmId: string, 
+  farmId: string,
   cropStatus: string
 ): Promise<{ success: boolean; error?: string; data?: TFarm }> {
   try {
@@ -165,15 +164,15 @@ export async function updateCropStatusAction(
       return { success: true, data: farm };
     }
 
-    return { 
-      success: false, 
-      error: apiResponse?.message || 'Không thể cập nhật trạng thái cây trồng' 
+    return {
+      success: false,
+      error: apiResponse?.message || 'Không thể cập nhật trạng thái cây trồng'
     };
   } catch (error) {
     console.error('Update crop status error:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Lỗi không xác định' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     };
   }
 }

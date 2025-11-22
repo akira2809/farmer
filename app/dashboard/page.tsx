@@ -1,13 +1,17 @@
 import Sidebar from "./Sidebar";
 import Image from "next/image";
+import { Tractor, Sprout, Leaf, Sun, Wheat, CircleOff } from "lucide-react";
 import farmApi from "@/services/farm";
-import { TFarm } from "@/models/farm";
+import { TFarm, CROP_STATUS_LABELS, CropStatus } from "@/models/farm";
 import FarmImage from "@/components/FarmImage";
 import WeatherAdviceCarousel from "./components/WeatherAdviceCarousel";
+import Link from "next/link";
+import SearchInput from "./components/SearchInput";
 
-async function getData(): Promise<TFarm[]> {
+async function getData(search?: string, startDate?: string, endDate?: string): Promise<TFarm[]> {
   try {
-    const productRes = await farmApi.getFarms();
+    console.log('Fetching farms with params:', { search, startDate, endDate });
+    const productRes = await farmApi.getFarms(search, startDate, endDate);
     // Extract farm data from response structure
     const response = productRes as any;
     const farms = response?.data?.data ||
@@ -22,15 +26,41 @@ async function getData(): Promise<TFarm[]> {
   }
 }
 
-
-
 const imgImage6 = "https://www.figma.com/api/mcp/asset/4e070d67-dbbd-4d67-b9d1-50ffc064a606";
-const imgFrame2 = "https://www.figma.com/api/mcp/asset/2781859a-9304-4399-9002-5e1b53c31c3c";
-const img = "https://www.figma.com/api/mcp/asset/128ff98a-2b21-4648-a0e3-c688323f53a4";
-const img1 = "https://www.figma.com/api/mcp/asset/e67b2a82-c3e1-49ef-9428-9c423c769b4f";
 
-export default async function Dashboard() {
-  const data = await getData();
+// Helper function to get icon based on status
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case 'preparing':
+      return <Tractor className="w-full h-full text-[#2e8623]" />;
+    case 'planted':
+      return <Sprout className="w-full h-full text-[#2e8623]" />;
+    case 'growing':
+      return <Leaf className="w-full h-full text-[#2e8623]" />;
+    case 'flowering':
+      return <Sun className="w-full h-full text-yellow-500" />;
+    case 'harvested':
+      return <Wheat className="w-full h-full text-orange-500" />;
+    case 'fallow':
+      return <CircleOff className="w-full h-full text-gray-400" />;
+    default:
+      return <Sprout className="w-full h-full text-[#2e8623]" />;
+  }
+};
+
+export default async function Dashboard(props: {
+  searchParams: Promise<{
+    search?: string;
+    start_date?: string;
+    end_date?: string;
+  }>;
+}) {
+  const searchParams = await props.searchParams;
+  const search = searchParams?.search;
+  const startDate = searchParams?.start_date;
+  const endDate = searchParams?.end_date;
+
+  const data = await getData(search, startDate, endDate);
 
   return (
     <div className="bg-[#fffcf6] flex flex-col md:flex-row items-start relative min-h-screen w-full overflow-hidden">
@@ -44,16 +74,7 @@ export default async function Dashboard() {
               <p className="mb-0">Chào A,</p>
               <p>Bạn Cần Gì? Hãy Nói Cho Tôi Biết</p>
             </div>
-            <div className="bg-[#ebf5ed] border border-[#2e8623] border-solid box-border flex gap-[10px] h-[50px] md:h-[60px] items-center justify-end px-[11px] py-[8px] relative rounded-[18px] shrink-0 w-full max-w-[700px]">
-              <input
-                type="text"
-                className="flex-1 bg-transparent outline-none px-4 text-[15px] md:text-[16px]"
-                placeholder="Tìm kiếm..."
-              />
-              <button className="relative shrink-0 size-[40px] md:size-[50px] bg-[#2e8623] rounded-full flex items-center justify-center hover:bg-[#267019] transition-colors">
-                <Image alt="" className="block max-w-none w-[25px] md:w-[30px] h-[25px] md:h-[30px]" src={imgFrame2} width={40} height={40} />
-              </button>
-            </div>
+            <SearchInput />
           </div>
         </div>
 
@@ -73,30 +94,32 @@ export default async function Dashboard() {
           </p>
           <div className="flex gap-[12px] md:gap-[16px] items-start relative shrink-0 w-full overflow-x-auto pb-4 z-10 scrollbar-hide">
             {data?.length > 0 ? data.map((farm: TFarm) => (
-              <div key={farm.id || farm.name} className="bg-[#fffcf6] border-2 border-[#2e8623] border-solid relative rounded-[14.09px] shrink-0 w-[220px] md:w-[250px]">
-                <div className="box-border flex flex-col gap-[12px] md:gap-[15px] items-center overflow-clip pb-[20px] md:pb-[24px] pt-[12px] md:pt-[15px] px-[12px] md:px-[15px] relative rounded-[inherit]">
-                  <div className="relative h-[110px] md:h-[130px] shrink-0 w-full rounded-[8px] overflow-hidden">
-                    <FarmImage
-                      alt={farm.name}
-                      src={(farm as any).image}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-[4px] md:gap-[5px] items-start leading-[normal] relative shrink-0 text-black w-full">
-                    <p className="font-['Be_Vietnam_Pro'] font-semibold relative shrink-0 text-[18px] md:text-[20px] w-full">
-                      {farm.name || 'N/A'}
-                    </p>
-                    <p className="font-['Be_Vietnam_Pro'] relative shrink-0 text-[13px] md:text-[14px] w-full">
-                      Ngày trồng: {farm.planting_date ? new Date(farm.planting_date).toLocaleDateString('vi-VN') : 'N/A'}
-                    </p>
-                    <p className="font-['Be_Vietnam_Pro'] relative shrink-0 text-[13px] md:text-[14px] w-full">
-                      Tình Trạng: {farm.crop_status || 'N/A'}
-                    </p>
-                  </div>
-                  <div className="absolute h-[65px] md:h-[75px] right-[18px] md:right-[20px] bottom-[24px] md:bottom-[28px] w-[62px] md:w-[71px]">
-                    <Image alt="" className="block max-w-none size-full" src={farm.crop_status?.includes('bệnh') ? img : img1} fill />
+              <Link key={farm.id || farm.name} href={`/dashboard/fields/${farm.id}`} className="block shrink-0">
+                <div className="bg-[#fffcf6] border-2 border-[#2e8623] border-solid relative rounded-[14.09px] shrink-0 w-[220px] md:w-[250px] hover:shadow-lg transition-shadow cursor-pointer">
+                  <div className="box-border flex flex-col gap-[12px] md:gap-[15px] items-center overflow-clip pb-[20px] md:pb-[24px] pt-[12px] md:pt-[15px] px-[12px] md:px-[15px] relative rounded-[inherit]">
+                    <div className="relative h-[110px] md:h-[130px] shrink-0 w-full rounded-[8px] overflow-hidden">
+                      <FarmImage
+                        alt={farm.name}
+                        src={(farm as any).image}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-[4px] md:gap-[5px] items-start leading-[normal] relative shrink-0 text-black w-full pr-[60px]">
+                      <p className="font-['Be_Vietnam_Pro'] font-semibold relative shrink-0 text-[18px] md:text-[20px] w-full truncate">
+                        {farm.name || 'N/A'}
+                      </p>
+                      <p className="font-['Be_Vietnam_Pro'] relative shrink-0 text-[13px] md:text-[14px] w-full">
+                        Ngày trồng: {farm.planting_date ? new Date(farm.planting_date).toLocaleDateString('vi-VN') : 'N/A'}
+                      </p>
+                      <p className="font-['Be_Vietnam_Pro'] relative shrink-0 text-[13px] md:text-[14px] w-full">
+                        Tình Trạng: {CROP_STATUS_LABELS[farm.crop_status as CropStatus] || farm.crop_status || 'N/A'}
+                      </p>
+                    </div>
+                    <div className="absolute h-[50px] md:h-[60px] right-[10px] bottom-[15px] w-[50px] md:w-[60px] opacity-80">
+                      {getStatusIcon(farm.crop_status)}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             )) : (
               <p className="text-center text-gray-500 w-full py-8">Không có dữ liệu ruộng</p>
             )}
