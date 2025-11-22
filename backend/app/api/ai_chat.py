@@ -127,150 +127,158 @@ async def detect_disease(
         )
 
 
+# @router.post(
+#     "/chat",
+#     response_model=APIResponse[ChatResponse],
+#     status_code=status.HTTP_200_OK
+# )
+# async def chat_with_ai(
+#     chat_request: ChatRequest,
+#     current_user: UserInDB = Depends(get_current_user)
+# ) -> Dict[str, Any]:
+#     """
+#     General chat with AI assistant about agriculture and plant diseases.
+#     User's chat history is automatically loaded and saved.
+    
+#     - **message**: User's question or message
+#     - **conversation_history**: Optional previous conversation for context (if not provided, uses saved history)
+    
+#     Rate limit: 30 requests per minute
+#     """
+#     try:
+#         # Apply rate limiting
+#         await apply_rate_limit(str(current_user.id), "chat")
+        
+#         user_id = str(current_user.id)
+        
+#         # Load conversation history from database if not provided
+#         if chat_request.conversation_history:
+#             # Use provided history with max limit validation
+#             # Limit to last 30 messages to prevent token overflow
+#             conversation = chat_request.conversation_history[-30:] if len(chat_request.conversation_history) > 30 else chat_request.conversation_history
+#             history = [
+#                 {"role": msg.role, "content": msg.content}
+#                 for msg in conversation
+#             ]
+#         else:
+#             # Load from database with conservative limit
+#             history = await chat_history_service.get_conversation_for_api(user_id, max_messages=30)
+        
+#         # Get response from Clova Studio with user's request_id
+#         response = await clova_service.chat(
+#             message=chat_request.message,
+#             request_id=current_user.clova_request_id,
+#             conversation_history=history
+#         )
+        
+#         if response.get("success"):
+#             ai_message = response.get("content", "")
+            
+#             # Save conversation to database
+#             await chat_history_service.add_conversation(
+#                 user_id=user_id,
+#                 user_message=chat_request.message,
+#                 assistant_message=ai_message
+#             )
+            
+#             chat_response = ChatResponse(
+#                 message=ai_message,
+#                 success=True,
+#                 error=None
+#             )
+            
+#             return success_response(
+#                 data=chat_response.model_dump(),
+#                 message="Chat response generated successfully"
+#             )
+#         else:
+#             return error_response(
+#                 message=response.get("error", "Failed to get AI response"),
+#                 code="CHAT_FAILED"
+#             )
+            
+#     except Exception as e:
+#         return error_response(
+#             message=f"Error in chat: {str(e)}",
+#             code="CHAT_ERROR"
+#         )
+
+
 @router.post(
     "/chat",
     response_model=APIResponse[ChatResponse],
     status_code=status.HTTP_200_OK
 )
-async def chat_with_ai(
-    chat_request: ChatRequest,
-    current_user: UserInDB = Depends(get_current_user)
-) -> Dict[str, Any]:
-    """
-    General chat with AI assistant about agriculture and plant diseases.
-    User's chat history is automatically loaded and saved.
-    
-    - **message**: User's question or message
-    - **conversation_history**: Optional previous conversation for context (if not provided, uses saved history)
-    
-    Rate limit: 30 requests per minute
-    """
-    try:
-        # Apply rate limiting
-        await apply_rate_limit(str(current_user.id), "chat")
-        
-        user_id = str(current_user.id)
-        
-        # Load conversation history from database if not provided
-        if chat_request.conversation_history:
-            # Use provided history with max limit validation
-            # Limit to last 30 messages to prevent token overflow
-            conversation = chat_request.conversation_history[-30:] if len(chat_request.conversation_history) > 30 else chat_request.conversation_history
-            history = [
-                {"role": msg.role, "content": msg.content}
-                for msg in conversation
-            ]
-        else:
-            # Load from database with conservative limit
-            history = await chat_history_service.get_conversation_for_api(user_id, max_messages=30)
-        
-        # Get response from Clova Studio with user's request_id
-        response = await clova_service.chat(
-            message=chat_request.message,
-            request_id=current_user.clova_request_id,
-            conversation_history=history
-        )
-        
-        if response.get("success"):
-            ai_message = response.get("content", "")
-            
-            # Save conversation to database
-            await chat_history_service.add_conversation(
-                user_id=user_id,
-                user_message=chat_request.message,
-                assistant_message=ai_message
-            )
-            
-            chat_response = ChatResponse(
-                message=ai_message,
-                success=True,
-                error=None
-            )
-            
-            return success_response(
-                data=chat_response.model_dump(),
-                message="Chat response generated successfully"
-            )
-        else:
-            return error_response(
-                message=response.get("error", "Failed to get AI response"),
-                code="CHAT_FAILED"
-            )
-            
-    except Exception as e:
-        return error_response(
-            message=f"Error in chat: {str(e)}",
-            code="CHAT_ERROR"
-        )
-
-
-@router.post(
-    "/chat-with-image",
-    response_model=APIResponse[ChatResponse],
-    status_code=status.HTTP_200_OK
-)
 async def chat_with_image(
-    message: str = Form(..., description="User's message or question about the image"),
-    image: UploadFile = File(..., description="Plant image for disease detection"),
+    message: str = Form(..., description="User's message or question"),
+    image: Optional[UploadFile] = File(None, description="Optional plant image for disease detection"),
     current_user: UserInDB = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """
-    Chat with AI assistant and send an image for disease detection.
-    Combines chat functionality with image analysis.
+    Chat with AI assistant with optional image for disease detection.
+    Can be used for text-only chat or chat with image analysis.
     
-    Workflow:
+    Workflow (with image):
     1. User uploads image with a question/message
     2. System detects disease from image
     3. AI generates response based on both the image analysis and user's message
     4. Conversation is saved to chat history
     
-    - **message**: User's question or comment about the plant
-    - **image**: Plant image file (JPG, PNG)
+    Workflow (without image):
+    1. User sends text message only
+    2. AI generates response based on user's message and chat history
+    3. Conversation is saved to chat history
     
-    Rate limit: 15 requests per minute
+    - **message**: User's question or comment (required)
+    - **image**: Plant image file (JPG, PNG) - optional
     
-    Example:
-    - message: "Cây cà chua của tôi bị sao vậy?"
-    - image: [photo of tomato plant]
+    Rate limit: 20 requests per minute
+    
+    Examples:
+    - With image: message="Cây cà chua của tôi bị sao vậy?" + image file
+    - Without image: message="Cách chăm sóc cây lúa vào mùa khô?"
     """
     try:
         # Apply rate limiting
         await apply_rate_limit(str(current_user.id), "chat_with_image")
         
-        # Validate file type
-        if not image.content_type or not image.content_type.startswith("image/"):
-            return error_response(
-                message="File must be an image (JPG, PNG, etc.)",
-                code="INVALID_FILE_TYPE"
-            )
-        
-        # Read image bytes
-        image_bytes = await image.read()
-        
-        # Check file size (max 10MB)
-        if len(image_bytes) > 10 * 1024 * 1024:
-            return error_response(
-                message="Image file too large. Maximum size is 10MB",
-                code="FILE_TOO_LARGE"
-            )
-        
         user_id = str(current_user.id)
-        
-        # Step 1: Detect disease from image
         detection_result = None
         detection_error = None
         
-        try:
-            detection_result = disease_service.predict_disease(image_bytes)
-        except Exception as e:
-            detection_error = str(e)
+        # Process image if provided
+        if image is not None:
+            # Validate file type
+            if not image.content_type or not image.content_type.startswith("image/"):
+                return error_response(
+                    message="File must be an image (JPG, PNG, etc.)",
+                    code="INVALID_FILE_TYPE"
+                )
+            
+            # Read image bytes
+            image_bytes = await image.read()
+            
+            # Check file size (max 10MB)
+            if len(image_bytes) > 10 * 1024 * 1024:
+                return error_response(
+                    message="Image file too large. Maximum size is 10MB",
+                    code="FILE_TOO_LARGE"
+                )
+            
+            # Detect disease from image
+            try:
+                detection_result = disease_service.predict_disease(image_bytes)
+            except Exception as e:
+                detection_error = str(e)
         
-        # Step 2: Build enhanced message with detection results
-        if detection_result:
+        # Build message with detection results if image was provided
+        if image is not None and detection_result:
             disease_info = f"\n\n[Kết quả phân tích ảnh: Phát hiện {detection_result['disease_name']} với độ tin cậy {detection_result['confidence']*100:.1f}%]"
             enhanced_message = message + disease_info
-        else:
+        elif image is not None and detection_error:
             enhanced_message = message + f"\n\n[Không thể phân tích ảnh: {detection_error}]"
+        else:
+            enhanced_message = message
         
         # Step 3: Load conversation history
         history = await chat_history_service.get_conversation_for_api(user_id, max_messages=20)
@@ -285,10 +293,11 @@ async def chat_with_image(
         if response.get("success"):
             ai_message = response.get("content", "")
             
-            # Save conversation to database (save original user message, not enhanced)
+            # Save conversation to database (mark if image was sent)
+            user_message_to_save = f"{message} [đã gửi ảnh]" if image is not None else message
             await chat_history_service.add_conversation(
                 user_id=user_id,
-                user_message=f"{message} [đã gửi ảnh]",
+                user_message=user_message_to_save,
                 assistant_message=ai_message
             )
             
