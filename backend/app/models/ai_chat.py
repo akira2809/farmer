@@ -72,6 +72,9 @@ class ChatResponse(BaseModel):
     success: bool = Field(..., description="Whether the request was successful")
     error: Optional[str] = Field(None, description="Error message if failed")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+    # Optional fields for image-based chat
+    has_image_analysis: bool = Field(default=False, description="Whether this response includes image analysis")
+    disease_detection: Optional[DiseaseDetectionResult] = Field(None, description="Disease detection results if image was provided")
 
 
 class ImageUploadResponse(BaseModel):
@@ -79,3 +82,14 @@ class ImageUploadResponse(BaseModel):
     image_processed: bool = Field(..., description="Whether image was processed")
     file_size: int = Field(..., description="Size of uploaded file in bytes")
     message: str = Field(..., description="Status message")
+
+
+class ChatWithImageRequest(BaseModel):
+    """Request for chat with optional image attachment"""
+    message: str = Field(
+        ...,
+        description="User's message or question about the image",
+        min_length=1,
+        max_length=5000
+    )
+    # Image will be uploaded as multipart/form-data, not in JSON body

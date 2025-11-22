@@ -7,7 +7,8 @@ from app.models.ai_chat import (
     ChatRequest,
     ChatResponse,
     AIAdviceResponse,
-    DiseasePrediction
+    DiseasePrediction,
+    ChatWithImageRequest
 )
 from app.models.user import UserInDB
 from app.models.api_response import APIResponse, success_response, error_response
@@ -200,6 +201,127 @@ async def chat_with_ai(
         return error_response(
             message=f"Error in chat: {str(e)}",
             code="CHAT_ERROR"
+        )
+
+
+@router.post(
+    "/chat-with-image",
+    response_model=APIResponse[ChatResponse],
+    status_code=status.HTTP_200_OK
+)
+async def chat_with_image(
+    message: str = Form(..., description="User's message or question about the image"),
+    image: UploadFile = File(..., description="Plant image for disease detection"),
+    current_user: UserInDB = Depends(get_current_user)
+) -> Dict[str, Any]:
+    """
+    Chat with AI assistant and send an image for disease detection.
+    Combines chat functionality with image analysis.
+    
+    Workflow:
+    1. User uploads image with a question/message
+    2. System detects disease from image
+    3. AI generates response based on both the image analysis and user's message
+    4. Conversation is saved to chat history
+    
+    - **message**: User's question or comment about the plant
+    - **image**: Plant image file (JPG, PNG)
+    
+    Rate limit: 15 requests per minute
+    
+    Example:
+    - message: "Cây cà chua của tôi bị sao vậy?"
+    - image: [photo of tomato plant]
+    """
+    try:
+        # Apply rate limiting
+        await apply_rate_limit(str(current_user.id), "chat_with_image")
+        
+        # Validate file type
+        if not image.content_type or not image.content_type.startswith("image/"):
+            return error_response(
+                message="File must be an image (JPG, PNG, etc.)",
+                code="INVALID_FILE_TYPE"
+            )
+        
+        # Read image bytes
+        image_bytes = await image.read()
+        
+        # Check file size (max 10MB)
+        if len(image_bytes) > 10 * 1024 * 1024:
+            return error_response(
+                message="Image file too large. Maximum size is 10MB",
+                code="FILE_TOO_LARGE"
+            )
+        
+        user_id = str(current_user.id)
+        
+        # Step 1: Detect disease from image
+        detection_result = None
+        detection_error = None
+        
+        try:
+            detection_result = disease_service.predict_disease(image_bytes)
+        except Exception as e:
+            detection_error = str(e)
+        
+        # Step 2: Build enhanced message with detection results
+        if detection_result:
+            disease_info = f"\n\n[Kết quả phân tích ảnh: Phát hiện {detection_result['disease_name']} với độ tin cậy {detection_result['confidence']*100:.1f}%]"
+            enhanced_message = message + disease_info
+        else:
+            enhanced_message = message + f"\n\n[Không thể phân tích ảnh: {detection_error}]"
+        
+        # Step 3: Load conversation history
+        history = await chat_history_service.get_conversation_for_api(user_id, max_messages=20)
+        
+        # Step 4: Get AI response with enhanced context
+        response = await clova_service.chat(
+            message=enhanced_message,
+            request_id=current_user.clova_request_id,
+            conversation_history=history
+        )
+        
+        if response.get("success"):
+            ai_message = response.get("content", "")
+            
+            # Save conversation to database (save original user message, not enhanced)
+            await chat_history_service.add_conversation(
+                user_id=user_id,
+                user_message=f"{message} [đã gửi ảnh]",
+                assistant_message=ai_message
+            )
+            
+            # Build response with detection results
+            chat_response = ChatResponse(
+                message=ai_message,
+                success=True,
+                error=None,
+                has_image_analysis=detection_result is not None,
+                disease_detection=DiseaseDetectionResult(
+                    disease_name=detection_result["disease_name"],
+                    confidence=detection_result["confidence"],
+                    top_predictions=[
+                        DiseasePrediction(**pred) 
+                        for pred in detection_result.get("top_predictions", [])
+                    ]
+                ) if detection_result else None
+            )
+            
+            return success_response(
+                data=chat_response.model_dump(),
+                message="Chat with image analysis completed successfully"
+            )
+        else:
+            return error_response(
+                message=response.get("error", "Failed to get AI response"),
+                code="CHAT_FAILED"
+            )
+            
+    except Exception as e:
+        return error_response(
+            message=f"Error in chat with image: {str(e)}",
+            code="CHAT_WITH_IMAGE_ERROR"
         )
 
 
