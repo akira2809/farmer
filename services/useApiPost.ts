@@ -3,16 +3,18 @@ import { clientAuthUtils } from '@/utils/clientAuth';
 import funcUtils from '@/utils/funcUtils';
 import { fetchJsonWithAuth } from './fetchWithAuth';
 
-const useApiPost = async <T extends unknown = unknown>(url: string, payload: T) => {
+const useApiPost = async <T = any, R = any>(url: string, payload: T): Promise<R> => {
   const isServer = typeof window === 'undefined';
   // Get token from server-side (cookies) or client-side (cookies)
   const token = isServer ? await getTokenUser() : clientAuthUtils.getToken();
   
-  return await fetchJsonWithAuth(funcUtils.combineURL(url), {
+  const response = await fetchJsonWithAuth(funcUtils.combineURL(url), {
     method: 'POST',
     body: JSON.stringify(payload),
     ...funcUtils.FetchHeaders(token || undefined),
   });
+  
+  return response as R;
 };
 
 // For FormData (file uploads)

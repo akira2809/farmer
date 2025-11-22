@@ -1,6 +1,6 @@
 'use server';
 
-import { DiseaseDetectionFormData, DiseaseDetectionResponse } from '@/models/ai';
+import { DiseaseDetectionFormData, DiseaseDetectionResponse, ChatRequest, ChatResponse } from '@/models/ai';
 import aiApi from '@/services/ai';
 
 interface ApiResponse<T = unknown> {
@@ -59,5 +59,88 @@ export async function detectDiseaseAction(payload: DiseaseDetectionFormData): Pr
     console.error('Error message:', error instanceof Error ? error.message : error);
     console.error('Full error:', error);
     return null;
+  }
+  
+}
+
+export async function getHistoryChatAction(): Promise<Array<{ role: 'user' | 'assistant'; content: string; timestamp: string }>> {
+  try {
+    console.log('=== GET CHAT HISTORY ACTION START ===');
+    const messages = await aiApi.getHistoryChat();
+    console.log('Chat history action response:', messages);
+    
+    // The response is already an array of messages from the service
+    if (Array.isArray(messages) && messages.length > 0) {
+      console.log(`Successfully loaded ${messages.length} chat messages`);
+      return messages;
+    }
+    
+    console.log('No chat history found');
+    return [];
+  } catch (error) {
+    console.error('Error in getHistoryChatAction:', error);
+    return [];
+  }
+}
+
+export async function chatWithAIAction(payload: ChatRequest): Promise<ChatResponse | null> {
+  try {
+    console.log('=== AI CHAT ACTION START ===');
+    console.log('Chat payload:', JSON.stringify(payload, null, 2));
+    
+    const response = await aiApi.chatWithAI(payload);
+    console.log('=== AI CHAT RESPONSE ===');
+    console.log('API Response:', response);
+    
+    if (response?.success) {
+      console.log('Chat response successful');
+      return response;
+    } else {
+      console.error('Chat API Error:', response?.message || 'Unknown error');
+      console.error('Full error response:', response);
+      
+      // Return a proper error response
+      return {
+        success: false,
+        message: response?.message || 'Failed to process chat request',
+        data: {
+          message: response?.data?.message || 'An error occurred while processing your request',
+          success: false,
+          error: response?.data?.error || 'Unknown error',
+          timestamp: response?.data?.timestamp || new Date().toISOString()
+        },
+        error: response?.error || 'Unknown error'
+      };
+    }
+  } catch (error) {
+    console.error('=== AI CHAT ACTION ERROR ===');
+    console.error('Error type:', typeof error);
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    console.error('Error message:', errorMessage);
+    
+    // Return a proper error response
+    return {
+      success: false,
+      message: 'Failed to process chat request',
+      data: {
+        message: 'An error occurred while processing your chat request',
+        success: false,
+        error: errorMessage,
+        timestamp: new Date().toISOString()
+      },
+      error: errorMessage
+    };
+  }
+  
+}
+export async function deleteHistoryChatAction(): Promise<boolean> {
+  try {
+    console.log('=== DELETE CHAT HISTORY ACTION START ===');
+    const response = await aiApi.deleteHistoryChat();
+    console.log('Delete history action response:', response);
+    return true;
+  } catch (error) {
+    console.error('Error in deleteHistoryChatAction:', error);
+    return false;
   }
 }

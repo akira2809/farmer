@@ -47,6 +47,10 @@ export default {
         chatWithAI: `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/ai/chat`,
         // GET: Check if AI service is healthy
         checkAiHealth: `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/ai/health`,
+        // GET : History chat
+        getHistoryChat: `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/ai/chat-history`,
+        // DELETE : Delete history chat
+        deleteHistoryChat: `${baseUrl}/${NEXT_PUBLIC_API_CLIENT}/ai/chat-history`,
     },
     Notification: {
         // GET: Get all notifications for current user
