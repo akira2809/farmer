@@ -100,10 +100,10 @@ const MapPicker = ({
           {/* Tích hợp tìm kiếm vào Picker */}
           <MapSearch onLocationSelect={handleSearchSelect} />
 
-          {/* Base Map Layer - OpenStreetMap (Stable & Free) */}
+          {/* Base Map Layer - Google Maps với tiếng Việt */}
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi"
             maxZoom={19}
           />
           <LocationMarker onLocationSelect={handleLocationSelect} externalPosition={markerPosition} />

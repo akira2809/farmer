@@ -4,7 +4,7 @@
 
 "use server";
 
-import { getWeatherForecast, getWeatherByFarm } from "@/services/weatherService";
+import { getWeatherForecast, getWeatherByFarm, getWeatherAdvice } from "@/services/weatherService";
 import type { WeatherForecast } from "@/models/weather";
 
 interface ActionResult<T> {
@@ -54,6 +54,36 @@ export async function getWeatherByFarmAction(
     return {
       success: false,
       error: error instanceof Error ? error.message : "Không thể lấy dữ liệu thời tiết cho ruộng này",
+    };
+  }
+}
+
+/**
+ * Server Action: Get weather advice for a farm
+ */
+export async function getWeatherAdviceAction(
+  farmId: string
+): Promise<ActionResult<any>> {
+  try {
+    // Validate farmId parameter
+    if (!farmId || typeof farmId !== "string" || farmId.trim() === "") {
+      return {
+        success: false,
+        error: "Farm ID không hợp lệ",
+      };
+    }
+
+    const adviceData = await getWeatherAdvice(farmId);
+
+    return {
+      success: true,
+      data: adviceData,
+    };
+  } catch (error) {
+    console.error("Error fetching weather advice:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Không thể lấy lời khuyên thời tiết",
     };
   }
 }
