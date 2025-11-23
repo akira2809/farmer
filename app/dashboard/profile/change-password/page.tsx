@@ -79,7 +79,7 @@ export default function ChangePasswordPage() {
 
         {/* Title */}
         <div className="flex gap-[20px] items-center justify-center relative shrink-0 pt-4">
-          <h1 className="font-['Playfair_Display'] font-bold text-[28px] md:text-[36px] text-[#2e8623]">
+          <h1 className="font-['Montserrat'] font-bold text-[28px] md:text-[36px] text-[#2e8623]">
             Đổi Mật Khẩu
           </h1>
         </div>

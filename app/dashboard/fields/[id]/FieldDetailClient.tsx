@@ -70,7 +70,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
         {/* Title and Edit Button */}
         <div className="flex flex-col gap-[12px] md:gap-[14px] items-center relative shrink-0 w-full">
           <div className="flex gap-[20px] md:gap-[30px] items-center justify-center relative shrink-0 w-full">
-            <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[36px] md:text-[48px] text-black text-center">
+            <p className="capitalize font-['Montserrat'] font-semibold leading-[normal] relative shrink-0 text-[36px] md:text-[48px] text-black text-center">
               {currentFarm.name || 'Ruộng Lúa'}
             </p>
             <button className="bg-[#2e8623] box-border flex flex-col gap-[10px] items-start justify-center overflow-clip p-[12px] md:p-[15px] relative rounded-[50px] shrink-0 hover:bg-[#267019] transition-colors">
@@ -110,7 +110,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
               <MapPin className="size-5" />
               <p className="font-['Be_Vietnam_Pro'] font-semibold text-lg">Diện Tích</p>
             </div>
-            <p className="font-['Playfair_Display'] font-bold text-3xl text-black">
+            <p className="font-['Montserrat'] font-bold text-3xl text-black">
               {currentFarm.area ? `${currentFarm.area.toLocaleString('vi-VN')}` : '---'}
             </p>
             <p className="text-sm text-gray-600">mét vuông</p>
@@ -121,7 +121,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
               <Calendar className="size-5" />
               <p className="font-['Be_Vietnam_Pro'] font-semibold text-lg">Ngày Trồng</p>
             </div>
-            <p className="font-['Playfair_Display'] font-bold text-3xl text-black">
+            <p className="font-['Montserrat'] font-bold text-3xl text-black">
               {currentFarm.planting_date ? new Date(currentFarm.planting_date).toLocaleDateString('vi-VN') : '---'}
             </p>
             <p className="text-sm text-gray-600">
@@ -134,7 +134,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
               <Calendar className="size-5" />
               <p className="font-['Be_Vietnam_Pro'] font-semibold text-lg">Thu Hoạch</p>
             </div>
-            <p className="font-['Playfair_Display'] font-bold text-3xl text-black">
+            <p className="font-['Montserrat'] font-bold text-3xl text-black">
               {currentFarm.expected_harvest_date ? new Date(currentFarm.expected_harvest_date).toLocaleDateString('vi-VN') : '---'}
             </p>
             <p className="text-sm text-gray-600">
@@ -233,7 +233,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
 
               <div className="h-[15px] opacity-0" />
 
-              <p className="font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[26px] md:text-[32px] text-black text-center w-full">
+              <p className="font-['Montserrat'] font-semibold leading-[normal] relative shrink-0 text-[26px] md:text-[32px] text-black text-center w-full">
                 <span className="block">Ruộng của bạn hiện tại sao rồi?</span>
                 <span className="block">Hãy chụp cho bác sĩ xanh Biết!</span>
               </p>
@@ -262,7 +262,7 @@ export default function FieldDetailClient({ farm }: FieldDetailClientProps) {
             </div>
 
             <div className="box-border flex flex-col gap-[12px] md:gap-[15px] items-start overflow-clip px-0 py-[5px] relative shrink-0 w-full">
-              <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[26px] md:text-[32px] text-black text-center w-full">
+              <p className="capitalize font-['Montserrat'] font-semibold leading-[normal] relative shrink-0 text-[26px] md:text-[32px] text-black text-center w-full">
                 Lịch Sử
               </p>
 

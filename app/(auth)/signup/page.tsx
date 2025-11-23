@@ -83,7 +83,7 @@ export default function SignUp() {
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-[20px] md:gap-[25px] items-start justify-center relative shrink-0 w-full max-w-[800px] z-10">
         <div className="flex flex-col gap-[10px] items-start relative shrink-0 w-full">
-          <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[28px] md:text-[36px] text-black text-center w-full">
+          <p className="capitalize font-['Montserrat'] font-semibold leading-[normal] relative shrink-0 text-[28px] md:text-[36px] text-black text-center w-full">
             Đăng Kí
           </p>
         </div>

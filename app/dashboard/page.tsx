@@ -105,7 +105,7 @@ export default async function Dashboard(props: {
         </div>
 
         <div className="box-border flex flex-col gap-[15px] md:gap-[18px] items-start justify-center px-[20px] md:px-[40px] lg:px-[50px] py-0 relative shrink-0 w-full max-w-full">
-          <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[22px] md:text-[26px] text-black text-center w-full z-10">
+          <p className="capitalize font-['Montserrat'] font-semibold leading-[normal] relative shrink-0 text-[22px] md:text-[26px] text-black text-center w-full z-10">
             Ruộng Của Bạn
           </p>
           <div className="flex gap-[12px] md:gap-[16px] items-start relative shrink-0 w-full overflow-x-auto pb-4 z-10 scrollbar-hide">
@@ -156,7 +156,7 @@ export default async function Dashboard(props: {
         </div>
 
         <div className="box-border flex flex-col gap-[15px] md:gap-[18px] items-center justify-center px-[20px] md:px-[40px] py-0 relative shrink-0 w-full max-w-full pb-6 md:pb-8">
-          <p className="capitalize font-['Playfair_Display'] font-semibold leading-[1.3] relative shrink-0 text-[20px] md:text-[24px] text-black text-center w-full max-w-[600px] z-10">
+          <p className="capitalize font-['Montserrat'] font-semibold leading-[1.3] relative shrink-0 text-[20px] md:text-[24px] text-black text-center w-full max-w-[600px] z-10">
             Cây bạn có vấn đề Gì À?
           </p>
           <Link href={`/dashboard/doctor`}>

@@ -110,7 +110,7 @@ export default function NotificationsPage() {
         <div className="box-border flex flex-col gap-[18px] md:gap-[22px] items-center justify-center px-[20px] md:px-[40px] lg:px-[60px] py-0 relative shrink-0 w-full max-w-full pt-6 md:pt-8">
           <div className="bg-transparent h-[50px] md:h-[60px] shrink-0 w-full" />
           <div className="flex items-center justify-center gap-3 w-full">
-            <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[28px] md:text-[36px] text-black text-center">
+            <p className="capitalize font-['Montserrat'] font-semibold leading-[normal] relative shrink-0 text-[28px] md:text-[36px] text-black text-center">
               Thông Báo
             </p>
             {unreadCount > 0 && (

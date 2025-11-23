@@ -247,7 +247,7 @@ export default function EditFieldModal({ showModal, onClose, farm }: EditFieldMo
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
             <div className="bg-white box-border flex flex-col gap-[25px] md:gap-[30px] items-start pb-[40px] md:pb-[50px] pt-[60px] md:pt-[80px] px-0 relative rounded-[18px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-full max-w-[600px] max-h-[90vh] overflow-y-auto">
                 <div className="flex gap-[20px] md:gap-[30px] items-center justify-center relative shrink-0 w-full">
-                    <p className="capitalize font-['Playfair_Display'] font-semibold leading-[normal] relative shrink-0 text-[36px] md:text-[48px] text-black text-center">
+                    <p className="capitalize font-['Montserrat'] font-semibold leading-[normal] relative shrink-0 text-[36px] md:text-[48px] text-black text-center">
                         Sửa Thông Tin Ruộng
                     </p>
                 </div>
