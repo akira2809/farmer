@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import Image from 'next/image';
 import { CROP_STATUS_LABELS } from '@/models/farm';
+import IconSearch from "@/public/mingcute--search-fill.png"
 
 const imgFrame2 = "https://www.figma.com/api/mcp/asset/2781859a-9304-4399-9002-5e1b53c31c3c";
 
@@ -64,38 +65,38 @@ export default function SearchInput() {
 
     return (
         <div className="flex flex-col gap-3 md:gap-4 w-full max-w-[900px] items-center justify-center px-4 md:px-0">
+            {/* Search input */}
+            <div className="bg-[#ebf5ed] border border-[#2e8623] border-solid box-border flex gap-[10px] h-[45px] md:h-[60px] items-center justify-end px-[11px] py-[8px] relative rounded-[18px] shrink-0 w-full">
+                <input
+                    type="text"
+                    className="flex-1 bg-transparent outline-none px-2 md:px-4 text-[14px] md:text-[16px]"
+                    placeholder="Tìm kiếm..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                />
+            </div>
+
+            {/* Date range inputs */}
             <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full items-center justify-center">
-                <div className="bg-[#ebf5ed] border border-[#2e8623] border-solid box-border flex gap-[10px] h-[45px] md:h-[60px] items-center justify-end px-[11px] py-[8px] relative rounded-[18px] shrink-0 w-full md:flex-1">
+                <div className="bg-[#ebf5ed] border border-[#2e8623] border-solid box-border flex gap-[10px] h-[45px] md:h-[60px] items-center px-[11px] py-[8px] relative rounded-[18px] shrink-0 w-full md:flex-1">
                     <input
-                        type="text"
-                        className="flex-1 bg-transparent outline-none px-2 md:px-4 text-[14px] md:text-[16px]"
-                        placeholder="Tìm kiếm..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onKeyDown={handleKeyDown}
+                        type="date"
+                        className="flex-1 bg-transparent outline-none text-[14px] md:text-[15px]"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        placeholder="Từ ngày"
                     />
                 </div>
-
-                <div className="flex gap-2 items-center w-full md:w-auto">
-                    <div className="bg-[#ebf5ed] border border-[#2e8623] border-solid box-border flex gap-[10px] h-[45px] md:h-[60px] items-center px-[11px] py-[8px] relative rounded-[18px] shrink-0 flex-1 md:w-[160px]">
-                        <input
-                            type="date"
-                            className="flex-1 bg-transparent outline-none text-[13px] md:text-[15px]"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            placeholder="Từ ngày"
-                        />
-                    </div>
-                    <span className="text-[#2e8623] font-bold">-</span>
-                    <div className="bg-[#ebf5ed] border border-[#2e8623] border-solid box-border flex gap-[10px] h-[45px] md:h-[60px] items-center px-[11px] py-[8px] relative rounded-[18px] shrink-0 flex-1 md:w-[160px]">
-                        <input
-                            type="date"
-                            className="flex-1 bg-transparent outline-none text-[13px] md:text-[15px]"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            placeholder="Đến ngày"
-                        />
-                    </div>
+                <span className="text-[#2e8623] font-bold hidden md:block">-</span>
+                <div className="bg-[#ebf5ed] border border-[#2e8623] border-solid box-border flex gap-[10px] h-[45px] md:h-[60px] items-center px-[11px] py-[8px] relative rounded-[18px] shrink-0 w-full md:flex-1">
+                    <input
+                        type="date"
+                        className="flex-1 bg-transparent outline-none text-[14px] md:text-[15px]"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        placeholder="Đến ngày"
+                    />
                 </div>
             </div>
 
@@ -168,7 +169,7 @@ export default function SearchInput() {
                     className="relative shrink-0 w-full md:w-[50px] h-[45px] md:h-[50px] bg-[#2e8623] rounded-[18px] md:rounded-full flex items-center justify-center hover:bg-[#267019] transition-colors text-white gap-2"
                 >
                     <span className="md:hidden font-semibold text-[15px]">Tìm kiếm</span>
-                    <Image alt="" className="block max-w-none w-[20px] md:w-[30px] h-[20px] md:h-[30px]" src={imgFrame2} width={40} height={40} />
+                    <Image alt="" className="block max-w-none w-[20px] md:w-[30px] h-[20px] md:h-[30px]" src={IconSearch} width={40} height={40} />
                 </button>
             </div>
         </div>
